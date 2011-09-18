@@ -1,0 +1,17 @@
+"@" - cadeia_literal
+"!" - cadeia_literal
+"?" - cadeia_literal
+"\" - cadeia_literal
+"|" - cadeia_literal
+"$" - cadeia_literal
+"#" - cadeia_literal
+"@!" - cadeia_literal
+"? \" - cadeia_literal
+" | $" - cadeia_literal
+"# @#" - cadeia_literal
+"!!!" - cadeia_literal
+"''" - cadeia_literal
+"'!'" - cadeia_literal
+"' '" - cadeia_literal
+" ' " - cadeia_literal
+"'" - cadeia_literal

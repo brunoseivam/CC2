@@ -1,0 +1,16 @@
+algoritmo fim_algoritmo declare
+ literal inteiro real
+logico leia escreva 
+ logico leia escreva 
+se	entao	senao
+	fim_se	caso	seja
+fim_caso	tipo	para	
+	fim_se	caso	seja	
+ate 	faca 	fim_para
+ 	enquanto 	fim_enquanto 	procedimento
+fim_procedimento 	funcao 	fim_funcao 	
+ 	ate 	faca 	fim_para 	
+ou	 e	 nao
+	 registro	 fim_registro	 var
+constante	 verdadeiro	 falso	 
+	 constante	 verdadeiro	 falso retorne	 

@@ -1,0 +1,14 @@
+_a - identificador
+b_ - identificador
+__c - identificador
+d__ - identificador
+e_i_s - identificador
+_f_a_c_a - identificador
+g_a_t_o_ - identificador
+_h_o__r_a - identificador
+i___gual - identificador
+ja_ne__la - identificador
+ki__ra - identificador
+lam_______pa_da_ - identificador
+_mar__me_la___da - identificador
+_navio_ - identificador

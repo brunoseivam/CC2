@@ -1,0 +1,95 @@
+Linha 1: " - simbolo nao identificado
+2 - numero_inteiro
+bananas - identificador
+, - ,
+30 - numero_inteiro
+laranjas - identificador
+, - ,
+12 - numero_inteiro
+cerejas - identificador
++ - +
+Linha 3: " - simbolo nao identificado
+30 - numero_inteiro
+pessoas - identificador
+para - para
+comer - identificador
+.. - ..
+. - .
+= - =
+Linha 4: " - simbolo nao identificado
+Linha 4: \ - simbolo nao identificado
+nFOME - identificador
+Linha 4: \ - simbolo nao identificado
+n - identificador
+( - (
+Linha 5: " - simbolo nao identificado
+Bom - identificador
+, - ,
+muito - identificador
+bom - identificador
+Linha 5: ! - simbolo nao identificado
+"," - cadeia_literal
+Continue - identificador
+assim - identificador
+Linha 7: " - simbolo nao identificado
+) - )
+" ERRO - ;o) brincadeirinha!\n" - cadeia_literal
+& - &
+Linha 10: " - simbolo nao identificado
+voce - identificador
+SABE - identificador
+o - identificador
+que - identificador
+esta - identificador
+fazendo - identificador
+Linha 10: ? - simbolo nao identificado
+_ - identificador
+Perguntou - identificador
+a - identificador
+professora - identificador
+. - .
+Se - identificador
+eu - identificador
+disser - identificador
+que - identificador
+1 - numero_inteiro
++ - +
+1 - numero_inteiro
+= - =
+2.0 - numero_real
+, - ,
+estarei - identificador
+dizendo - identificador
+a - identificador
+verdade - identificador
+Linha 11: ? - simbolo nao identificado
+Linha 11: ? - simbolo nao identificado
+Linha 11: ? - simbolo nao identificado
+Linha 11: " - simbolo nao identificado
+- - -
+> - >
+Linha 12: " - simbolo nao identificado
+TE - identificador
+PEGUEI - identificador
+Linha 13: ! - simbolo nao identificado
+Linha 13: " - simbolo nao identificado
+"" - cadeia_literal
+. - .
+Linha 14: " - simbolo nao identificado
+Linha 15: \ - simbolo nao identificado
+t7 - identificador
+% - %
+da - identificador
+populacao - identificador
+mundial - identificador
+.. - ..
+. - .
+"%" - cadeia_literal
+ja - identificador
+viu - identificador
+disco - identificador
+voador - identificador
+Linha 15: " - simbolo nao identificado
+" mande@email em caso de #duvida#\n" - cadeia_literal
+<- - <-
+"'oi' testando '123'" - cadeia_literal

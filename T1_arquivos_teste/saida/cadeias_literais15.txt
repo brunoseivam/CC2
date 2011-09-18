@@ -1,0 +1,25 @@
+"2 bananas, 30 laranjas, 12 cerejas" - cadeia_literal
++ - +
+"30 pessoas para comer ..." - cadeia_literal
+= - =
+"\nFOME\n" - cadeia_literal
+( - (
+" Bom, muito bom!" - cadeia_literal
+, - ,
+"Continue assim" - cadeia_literal
+) - )
+" ERRO - ;o) brincadeirinha!\n" - cadeia_literal
+& - &
+" voce SABE o que esta fazendo? _ Perguntou a professora. " - cadeia_literal
+"Se eu disser que 1+1=2,0, estarei dizendo a verdade???" - cadeia_literal
+- - -
+> - >
+" TE PEGUEI!" - cadeia_literal
+"" - cadeia_literal
+. - .
+"\t7% da populacao mundial ..." - cadeia_literal
+% - %
+" ja viu disco voador" - cadeia_literal
+" mande@email em caso de #duvida#\n" - cadeia_literal
+<- - <-
+"................" - cadeia_literal

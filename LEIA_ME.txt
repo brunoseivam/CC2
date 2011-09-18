@@ -1,0 +1,19 @@
+Trabalho 1 de Construção de Compiladores 2
+
+Linguagem utilizada: C (ISO C90)
+
+Grupo 5
+Integrantes:
+	Bruno Seiva Martins 	321710
+	Lucas Maziero Russo 	321583
+	Marcos Vinicius Campelo 321508
+	Nathan Augusto Ozelim 	321516
+	Talita Meirelles 	321729
+
+Para compilar
+
+gcc lex.c -o lex.out
+
+Para rodar
+
+./lex.out entrada.txt saida.txt

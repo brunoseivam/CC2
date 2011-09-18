@@ -1,0 +1,15 @@
+"hoje" - cadeia_literal
+" eh o oposto" - cadeia_literal
+"de ontem " - cadeia_literal
+"a casa eh branca" - cadeia_literal
+"mas" - cadeia_literal
+" o cachorro latiu" - cadeia_literal
+" e o menino riu" - cadeia_literal
+"cada macaco " - cadeia_literal
+"no seu galho " - cadeia_literal
+" que coisa  " - cadeia_literal
+"eh a vida" - cadeia_literal
+"a	atitude" - cadeia_literal
+"  esta	na mente " - cadeia_literal
+"cada um" - cadeia_literal
+"sabe o que faz" - cadeia_literal

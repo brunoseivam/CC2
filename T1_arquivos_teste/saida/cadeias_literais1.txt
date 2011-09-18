@@ -1,0 +1,6 @@
+"hoje" - cadeia_literal
+"a casa eh branca" - cadeia_literal
+" o cachorro latiu" - cadeia_literal
+"cada macaco no seu galho " - cadeia_literal
+" que coisa  " - cadeia_literal
+"a	atitude  esta	na mente " - cadeia_literal

@@ -1,0 +1,10 @@
+{uma linha apenas}
+{ uma linha que contem simbolo nao identificado: @}
+{essa contem palavra reservada: algoritmo, se, caso ...}
+{ numeros: 0, 1, 23,45 }
+{90 9867 8,7 00 ,1234 897,}
+{$ # @}
+{! )( &*5}
+{*****************************************************}
+{TESTE TESTE TESTE}
+{)_IUTY_ OU98+_)*[LOUH}

@@ -1,0 +1,15 @@
+"HOJE" - cadeia_literal
+" EH O OPOSTO" - cadeia_literal
+"DE ONTEM " - cadeia_literal
+"A CASA EH BRANCA" - cadeia_literal
+"MAS" - cadeia_literal
+" O CACHORRO LATIU" - cadeia_literal
+" E O MENINO RIU" - cadeia_literal
+"CADA MACACO " - cadeia_literal
+"NO SEU GALHO " - cadeia_literal
+" QUE COISA  " - cadeia_literal
+"EH A VIDA" - cadeia_literal
+"A	ATITUDE" - cadeia_literal
+"  ESTA	NA MENTE " - cadeia_literal
+"CADA UM" - cadeia_literal
+"SABE O QUE FAZ" - cadeia_literal

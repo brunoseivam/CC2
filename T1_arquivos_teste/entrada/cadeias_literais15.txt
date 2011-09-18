@@ -1,0 +1,6 @@
+"2 bananas, 30 laranjas, 12 cerejas"+"30 pessoas para comer ..."="\nFOME\n"
+(" Bom, muito bom!","Continue assim")
+" ERRO - ;o) brincadeirinha!\n"&" voce SABE o que esta fazendo? _ Perguntou a professora. "
+"Se eu disser que 1+1=2,0, estarei dizendo a verdade???"->" TE PEGUEI!"
+""."\t7% da populacao mundial ..."%" ja viu disco voador"
+" mande@email em caso de #duvida#\n"<-"................"

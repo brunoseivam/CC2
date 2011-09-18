@@ -1,0 +1,25 @@
+"algoritmo" - cadeia_literal
+" fim_algoritmo" - cadeia_literal
+"declare " - cadeia_literal
+" literal " - cadeia_literal
+"	inteiro" - cadeia_literal
+"real	" - cadeia_literal
+"	logico	" - cadeia_literal
+" 	leia" - cadeia_literal
+"escreva 	" - cadeia_literal
+" 	se 	" - cadeia_literal
+"	 entao" - cadeia_literal
+"senao	 " - cadeia_literal
+"	 fim_se	 " - cadeia_literal
+"caso seja " - cadeia_literal
+" fim_caso tipo" - cadeia_literal
+"para verdadeiro " - cadeia_literal
+" ate falso " - cadeia_literal
+"faca	fim_para" - cadeia_literal
+"	enquanto	fim_enquanto" - cadeia_literal
+"procedimento	fim_procedimento	" - cadeia_literal
+"	funcao	fim_funcao	" - cadeia_literal
+" 	ou 	e" - cadeia_literal
+"nao 	registro 	" - cadeia_literal
+" 	fim_registro 	var" - cadeia_literal
+"constante" - cadeia_literal

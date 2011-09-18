@@ -1,0 +1,8 @@
+Linha 1: # - simbolo nao identificado
+Linha 2: @ - simbolo nao identificado
+Linha 3: ' - simbolo nao identificado
+Linha 4: ? - simbolo nao identificado
+Linha 5: \ - simbolo nao identificado
+Linha 6: | - simbolo nao identificado
+Linha 7: ! - simbolo nao identificado
+Linha 8: } - simbolo nao identificado

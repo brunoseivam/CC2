@@ -1,0 +1,14 @@
+_A - identificador
+B_ - identificador
+__CAOS - identificador
+D__ - identificador
+E_I_SAO - identificador
+_F_A_C_A - identificador
+G_A_TI_NHO_ - identificador
+_H_O__R_A - identificador
+I___GUAL_DADE__ - identificador
+JA_NE__LA - identificador
+KI__RA - identificador
+LAM_______PA_DA_ - identificador
+_MAR__ME_LA___DA - identificador
+_NAVIO_ - identificador

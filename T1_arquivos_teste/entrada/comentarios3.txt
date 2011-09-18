@@ -1,0 +1,8 @@
+1+1=2{uma linha apenas} 
+8.9 { uma linha que contem simbolo nao identificado: @}
+casa GRANDE {essa contem palavra reservada: algoritmo, se, caso ...}	
+=7865 { numeros: 0. 1. 23.45 }
+%&^ {90 9867 8.7 00 .1234 897.} {$ # @}
+se{! )( &*5}	
+entao	{*****************************************************}	
+faca {TESTE TESTE TESTE} enquanto {)_IUTY_ OU98+_)*[LOUH} 

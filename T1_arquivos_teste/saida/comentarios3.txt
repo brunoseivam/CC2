@@ -1,0 +1,17 @@
+1 - numero_inteiro
++ - +
+1 - numero_inteiro
+= - =
+2 - numero_inteiro
+8.9 - numero_real
+casa - identificador
+GRANDE - identificador
+= - =
+7865 - numero_inteiro
+% - %
+& - &
+^ - ^
+se - se
+entao - entao
+faca - faca
+enquanto - enquanto

@@ -1,0 +1,14 @@
+"0" - cadeia_literal
+" 1" - cadeia_literal
+"2 " - cadeia_literal
+" 3 " - cadeia_literal
+"4 5 6" - cadeia_literal
+" 5 8 9" - cadeia_literal
+"6 78 90 " - cadeia_literal
+"7987 " - cadeia_literal
+"887 " - cadeia_literal
+"886 9" - cadeia_literal
+" 0 0 1" - cadeia_literal
+"0978 9077 123" - cadeia_literal
+"4567 7875 9 1" - cadeia_literal
+" 0 890123 0 " - cadeia_literal

@@ -1,0 +1,12 @@
+_12 - identificador
+_123_ - identificador
+_1 - identificador
+_89__78 - identificador
+__89__ - identificador
+__00__01 - identificador
+__00__01__ - identificador
+_00__01_ - identificador
+_0_ - identificador
+_0_1_ - identificador
+_087_1_2 - identificador
+_0_189_ - identificador
