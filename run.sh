@@ -1,7 +1,13 @@
 #!/bin/bash
 
 folder="T1_arquivos_teste"
-prog="lex"
+
+gcc -Wall -pedantic -ansi -o main.c lex.c -o main.out
+exit
+
+
+
+
 
 gcc -Wall -pedantic -ansi -o $prog.out $prog.c
 
