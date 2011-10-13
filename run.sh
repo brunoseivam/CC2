@@ -2,7 +2,7 @@
 
 folder="T1_arquivos_teste"
 
-gcc -Wall -pedantic -ansi -o main.c lex.c -o main.out
+gcc -Wall -pedantic -std=c99 syntax.c lex.c main.c common.c -o main.out
 exit
 
 

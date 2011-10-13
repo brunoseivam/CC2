@@ -1,30 +1,5 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "lex.h"
 
-int search_keyword(char* kw)
-{
-   int min, max, i, res;
-
-   min = 0;
-   max = keyword_list_size-1;
-   i = (max + min) / 2;
-
-   while(min<=max)
-   {
-      res = strcmp(kw, keyword_list[i]);
-      if(res < 0)
-         max = i-1;
-      else if(res > 0)
-         min = i+1;
-      else
-         return 0;   /* ENCONTROU      */
-      i = (max+min)/2;
-   }
-   return 1;         /* NAO ENCONTROU  */
-}
 
 token* get_token()
 {
@@ -37,6 +12,7 @@ token* get_token()
    do
    {
       comment_recognized = 0;
+
       /* Consome espacos em branco e comentarios */
       c = getc(in_file);
       while(ISWHITESPACE(c))
@@ -93,7 +69,7 @@ token* get_token()
 }
 
 /* Caractere nao reconhecido - prepara estrutura 'token' */
-int aut_notrecognized(token* tk)
+int aut_notrecognized   (token* tk)
 {
    tk->string = (char *) malloc(2*sizeof(char));
    tk->class = error1;
@@ -103,7 +79,7 @@ int aut_notrecognized(token* tk)
    return RECOGNIZED;
 }
 
-int aut_number(token* tk)
+int aut_number          (token* tk)
 {
    int count = 1;                                /* 1 caractere jah foi lido                 */
    int n_returned;                               /* Numero de caracteres a serem devolvidos  */
@@ -155,7 +131,7 @@ int aut_number(token* tk)
     return RECOGNIZED;
 }
 
-int aut_identifier(token* tk)
+int aut_identifier      (token* tk)
 {
    int   count = 1;                                /* Conta o numero de caracteres lidos (1 já foi lido)       */
    char  c;                                        /* Ultimo caractere lido                                    */
@@ -172,15 +148,15 @@ int aut_identifier(token* tk)
    fread(tk->string, sizeof(char), count-1, in_file); /* Le count-1 caracteres. O ultimo e' devolvido(invalido)   */
    tk->string[count-1] = '\0';                        /* Finalização da string                                    */
 
-   if(search_keyword(tk->string))
-      tk->class = identifier;
-   else
+   if(search(tk->string, keyword_list, keyword_list_size, SEARCH_STRING) == SUCCESS)
       tk->class = keyword;
+   else
+      tk->class = identifier;
 
    return RECOGNIZED;
 }
 
-int aut_comment(token* tk)
+int aut_comment         (token* tk)
 {
    char  c;                                        /* Ultimo caractere lido                                                */
 
@@ -201,7 +177,7 @@ int aut_comment(token* tk)
    return NOTRECOGNIZED;
 }
 
-int aut_string(token* tk)
+int aut_string          (token* tk)
 {
    char  c;                                        /* Ultimo caractere lido                           */
    int   count = 1;                                /* 1 caractere jah foi lido                        */
@@ -227,7 +203,7 @@ int aut_string(token* tk)
    return RECOGNIZED;
 }
 
-int aut_symbol(token* tk)
+int aut_symbol          (token* tk)
 {
    char  c1 = getc(in_file);                                      /* Ultimo caractere lido                  */
    char  c2 = getc(in_file);                                      /* Ultimo caractere lido                  */
@@ -262,7 +238,7 @@ int aut_symbol(token* tk)
    return RECOGNIZED;
 }
 
-void print_token(token* tk)
+void print_token        (token* tk)
 {
    switch(tk->class)
    {
@@ -292,19 +268,11 @@ void print_token(token* tk)
          fprintf(out_file, "tk->class nao reconhecido! [%d]\n", tk->class);
    }
 }
+
+/*
 int main(int argc, char** argv)
 {
-   token* tk;
-   /* Arquivos de entrada e saida passados como argumentos */
-   if( (in_file = fopen(argv[1], "r")) == NULL)
-      printf("Erro ao abrir arquivo %s.\n", argv[1]);
-   if( (out_file = fopen(argv[2], "w")) == NULL)
-      printf("Erro ao abrir arquivo %s.\n", argv[2]);
-
-   line_number = 1;
-
-
-   /* tk != null (EOF)*/
+   tk != null (EOF)
    while((tk = get_token()))
    {
       print_token(tk);
@@ -316,5 +284,5 @@ int main(int argc, char** argv)
    fclose(out_file);
 
    return 0;
-}
+}*/
 
