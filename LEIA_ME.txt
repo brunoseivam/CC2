@@ -1,6 +1,6 @@
 Trabalho 1 de Construção de Compiladores 2
 
-Linguagem utilizada: C (ISO C90)
+Linguagem utilizada: C (ISO C99)
 
 Grupo 5
 Integrantes:
@@ -12,8 +12,8 @@ Integrantes:
 
 Para compilar
 
-gcc lex.c -o lex.out
+gcc -Wall -pedantic -std=c99 syntax.c lex.c main.c common.c -o main.out
 
 Para rodar
 
-./lex.out entrada.txt saida.txt
+./main.out entrada.txt saida.txt
