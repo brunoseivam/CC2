@@ -37,7 +37,7 @@ int   search(void* kw, void* vec, int vec_size, int type)
 
    while(min<=max)
    {
-      if(type == SEARCH_STRING)
+      if(type == STRING)
          res = strcmp((char*) kw, ((char**) vec)[i]);
       else
          res = ((token_class*) vec)[i] - ((token_class) kw);
@@ -56,10 +56,10 @@ int   search(void* kw, void* vec, int vec_size, int type)
 int search_first(token* tk, firsts p)
 {
    if(!(tk->string == NULL) &&
-        search((void*) tk->string, (void*) p.string_list, p.string_list_size, SEARCH_STRING) == SUCCESS)
+        search((void*) tk->string, (void*) p.string_list, p.string_list_size, STRING) == SUCCESS)
       return SUCCESS;
 
-   if(search((void* )tk->class, (void*) p.tk_class_list, p.tk_class_list_size, SEARCH_TK_CLASS) == SUCCESS)
+   if(search((void* )tk->class, (void*) p.tk_class_list, p.tk_class_list_size, TK_CLASS) == SUCCESS)
       return SUCCESS;
 
    int i;

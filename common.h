@@ -9,8 +9,13 @@
 #define SUCCESS   0
 #define ERROR     -1
 
-#define SEARCH_STRING 1
-#define SEARCH_TK_CLASS 2
+#define STRING 1
+#define TK_CLASS 2
+
+#define  RECOGNIZED        0
+#define  NOTRECOGNIZED     -1
+#define  COMMENTERROR      -2
+#define  SYNTAXERROR       -3
 
 typedef enum token_class
 {
@@ -54,6 +59,8 @@ extern int   keyword_list_size;
 
 FILE     *in_file, *out_file;
 int      line_number;
+token*   tk;
+
 
 int      open_files(char* in, char* out);
 void     close_files();

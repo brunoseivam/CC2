@@ -2,9 +2,15 @@
 #include "lex.h"
 #include "syntax.h"
 
-
+void handle_error(int error)
+{
+   printf("handle error called %d\n", error);
+   return;
+}
 int main(int argc, char** argv)
 {
+   int ret;
+
    if(argc < 3)
    {
       printf("Numero incorreto de parametros. Uso:\n");
@@ -17,19 +23,11 @@ int main(int argc, char** argv)
       return 1;
    }
 
-   /* TESTES */
+   tk = get_token();
 
-   token t =
-   {
-      .class = keyword,
-      .string = "algoritmo"
-   };
-
-   printf("%d\n", search("faca", keyword_list, keyword_list_size, SEARCH_STRING) == SUCCESS);
-   printf("%d\n", search_first(&t, programa_firsts)==SUCCESS);
-
-   /* FIM_TESTES */
-
+   ret = programa();
+   if(ret != SUCCESS)
+      handle_error(ret);
 
    close_files();
 

@@ -148,7 +148,7 @@ int aut_identifier      (token* tk)
    fread(tk->string, sizeof(char), count-1, in_file); /* Le count-1 caracteres. O ultimo e' devolvido(invalido)   */
    tk->string[count-1] = '\0';                        /* Finalização da string                                    */
 
-   if(search(tk->string, keyword_list, keyword_list_size, SEARCH_STRING) == SUCCESS)
+   if(search(tk->string, keyword_list, keyword_list_size, STRING) == SUCCESS)
       tk->class = keyword;
    else
       tk->class = identifier;

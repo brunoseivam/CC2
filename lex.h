@@ -21,9 +21,7 @@
 
 #define  ISEOF(c)          (c == EOF)
 
-#define  RECOGNIZED        0
-#define  NOTRECOGNIZED     -1
-#define  COMMENTERROR      -2
+
 
 /* Automatos usados */
 int      aut_identifier    (token* tk);
