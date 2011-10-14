@@ -57,7 +57,8 @@ token* get_token()
    /* Fim de arquivo */
    else if(ISEOF(c))
    {
-      tk->string = NULL;
+      tk->string = (char* )malloc(sizeof(char));
+      tk->string = '\0';
       tk->class = eof;
    }
    else                                /* Caractere não reconhecido */
@@ -167,7 +168,8 @@ int aut_comment         (token* tk)
       else if(ISLINEFEED(c) || ISEOF(c))
       {
          tk->class = error2;                       /* Comentario não fechado                                               */
-         tk->string = NULL;
+         tk->string = (char*)malloc(sizeof(char));
+         tk->string = '\0';
          ++line_number;                            /* Motivo de discórdia. Não deveria ser no reconhecdor de whitespace?   */
          return COMMENTERROR;
       }

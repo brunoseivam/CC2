@@ -5,7 +5,7 @@
 #include "lex.h"
 
 #define  CALL(automata)          if( (ret = automata() ) != SUCCESS ) return ret
-#define  CHECK_STRING(tk, str)   if( !tk->string || (strcmp(tk->string, str) != SUCCESS) ) return SYNTAXERROR
+#define  CHECK_STRING(tk, str)   if( strcmp(tk->string, str) != SUCCESS ) return SYNTAXERROR
 #define  CHECK_CLASS(tk, cls)    if( tk->class != cls ) return SYNTAXERROR
 
 #define  CHECK_STRINGS(tk, ...)  do{                                                      \
@@ -53,14 +53,14 @@ const firsts cmd_leia_firsts;
 const firsts cmd_escreva_firsts;
 
 /* Acosta */
-const firsts cmd_se_firsts; /* Não Usado */
-const firsts cmd_caso_firsts; /* Não Usado */
-const firsts cmd_para_firsts; /* Não Usado */
-const firsts cmd_enquanto_firsts; /* Não Usado */
-const firsts cmd_faca_firsts; /* Não Usado */
-const firsts cmd_pont_ident_firsts; /* Não Usado */
-const firsts cmd_ident_firsts; /* Não Usado */
-const firsts cmd_retorne_firsts; /* Não Usado */
+const firsts cmd_se_firsts;            /* Não Usado */
+const firsts cmd_caso_firsts;          /* Não Usado */
+const firsts cmd_para_firsts;          /* Não Usado */
+const firsts cmd_enquanto_firsts;      /* Não Usado */
+const firsts cmd_faca_firsts;          /* Não Usado */
+const firsts cmd_pont_ident_firsts;    /* Não Usado */
+const firsts cmd_ident_firsts;         /* Não Usado */
+const firsts cmd_retorne_firsts;       /* Não Usado */
 
 
 const firsts mais_expressao_firsts;
