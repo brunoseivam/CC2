@@ -57,8 +57,8 @@ token* get_token()
    /* Fim de arquivo */
    else if(ISEOF(c))
    {
-      free(tk);
-      tk = NULL;
+      tk->string = NULL;
+      tk->class = eof;
    }
    else                                /* Caractere não reconhecido */
    {
