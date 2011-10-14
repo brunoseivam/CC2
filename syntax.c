@@ -348,6 +348,7 @@ int cmd_se()
 	}
 
 	CHECK_STRING(tk, "fim_se");
+	tk = get_token();
 
    return SUCCESS;
 }
@@ -381,6 +382,7 @@ int cmd_caso()
 	}
 
 	CHECK_STRING(tk, "fim_caso");
+	tk = get_token();
 
    return SUCCESS;
 }
