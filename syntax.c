@@ -341,7 +341,7 @@ int cmd_se()
 	CHECK_STRING(tk, "entao");
 	tk = get_token();
 
-   if( strcmp(tk, "senao") == SUCCESS )
+   if( strcmp(tk->string, "senao") == SUCCESS )
 	{
 		tk = get_token();
 		CALL(comandos);
@@ -375,7 +375,7 @@ int cmd_caso()
 
 	CALL(selecao);
 
-   if( strcmp(tk, "senao") == SUCCESS )
+   if( strcmp(tk->string, "senao") == SUCCESS )
 	{
 		tk = get_token();
 		CALL(comandos);
@@ -480,14 +480,105 @@ int cmd_faca()
 }
 
 /*
-					Automato 22
-					    <cmd_pont_ident>                                | ^ IDENT <outros_ident> <dimensao> <- <expressao>
+Automato 22
+Autor: Acosta
 
-						Automato 23
-						     <cmd_ident>                               | IDENT <chamada_atribuicao>
-							 29. <chamada_atribuicao>       ::= ( <expressao> <mais_expressao> ) | <outros_ident> <dimensao> <- <expressao>
+<cmd_pont_ident> ::= ^ IDENT <outros_ident> <dimensao> <- <expressao>
+*/
+
+int cmd_pont_ident()
+{
+	int ret;
+
+	CHECK_STRING(tk, "^");
+	tk = get_token();
+
+	CHECK_CLASS(tk, identifier);
+	tk = get_token();
+
+	CALL(outros_ident);
+	CALL(dimensao);
+
+	CHECK_STRING(tk, "<-");
+	tk = get_token();
+
+	CALL(expressao);
+
+   return SUCCESS;
+}
+
+/*
+Automato 23
+Autor: Acosta
+
+<cmd_ident> ::= IDENT <chamada_atribuicao>
+<chamada_atribuicao> ::= ( <expressao> <mais_expressao> )
+									| <outros_ident> <dimensao> <- <expressao>
+*/
+
+int cmd_ident()
+{
+	int ret;
+
+	CHECK_CLASS(tk, identifier);
+	tk = get_token();
+
+	if( strcmp(tk->string, "(") == SUCCESS )
+	{
+		tk = get_token();
+
+		CALL(expressao);
+		CALL(mais_expressao);
+
+		CHECK_STRING(tk, ")");
+		tk = get_token();
+	}
+	else
+	{
+		CALL(outros_ident);
+		CALL(dimensao);
+
+		CHECK_STRING(tk, "<-");
+		tk = get_token();
+
+		CALL(expressao);
+	}
+
+	return SUCCESS;
+}
 
 
-							 Automato 24
-							      <cmd_retorne>                               | retorne <expressao>
-									*/
+/*
+Automato 24
+Autor: Acosta
+
+<cmd_retorne> ::= retorne <expressao>
+*/
+
+int cmd_retorne()
+{
+	int ret;
+
+	CHECK_STRING(tk, "retorne");
+	tk = get_token();
+
+	CALL(expressao);
+
+	return SUCCESS;
+}
+
+/* DUMMY: TODO automata */
+int expressao()
+{
+	return SUCCESS;
+}
+
+int selecao()
+{
+	return SUCCESS;
+}
+
+int mais_expressao()
+{
+	return SUCCESS;
+}
