@@ -5,7 +5,7 @@
 #include "lex.h"
 
 #define  CALL(automata)          if( (ret = automata() ) != SUCCESS ) return ret
-#define  CHECK_STRING(tk, str)   if( strcmp(tk->string, str) != SUCCESS ) return SYNTAXERROR
+#define  CHECK_STRING(tk, str)   if( !tk->string || (strcmp(tk->string, str) != SUCCESS) ) return SYNTAXERROR
 #define  CHECK_CLASS(tk, cls)    if( tk->class != cls ) return SYNTAXERROR
 
 #define  CHECK_STRINGS(tk, ...)  do{                                                      \
