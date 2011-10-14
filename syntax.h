@@ -25,7 +25,7 @@
                                     int count = sizeof(vec)/sizeof(token_class);          \
                                     while(count)                                          \
                                     {                                                     \
-                                       if( tk->class == vec[count-1]) )                   \
+                                       if( tk->class == vec[count-1] )                    \
                                             break;                                        \
                                        --count;                                           \
                                     }                                                     \
@@ -43,7 +43,6 @@ const firsts dimensao_firsts;          /* Não utilizado */
 const firsts tipo_firsts;              /* Não utilizado */
 const firsts mais_ident_firsts;        /* Não utilizado */
 
-
 const firsts tipo_basico_firsts;
 const firsts tipo_estendido_firsts;
 const firsts declaracao_global_firsts;
@@ -52,14 +51,18 @@ const firsts declaracoes_locais_firsts;
 const firsts comandos_firsts;
 const firsts cmd_leia_firsts;
 const firsts cmd_escreva_firsts;
-const firsts cmd_se_firsts;
-const firsts cmd_caso_firsts;
-const firsts cmd_para_firsts;
-const firsts cmd_enquanto_firsts;
-const firsts cmd_faca_firsts;
-const firsts cmd_pont_ident_firsts;
-const firsts cmd_ident_firsts;
-const firsts cmd_retorne_firsts;
+
+/* Acosta */
+const firsts cmd_se_firsts; /* Não Usado */
+const firsts cmd_caso_firsts; /* Não Usado */
+const firsts cmd_para_firsts; /* Não Usado */
+const firsts cmd_enquanto_firsts; /* Não Usado */
+const firsts cmd_faca_firsts; /* Não Usado */
+const firsts cmd_pont_ident_firsts; /* Não Usado */
+const firsts cmd_ident_firsts; /* Não Usado */
+const firsts cmd_retorne_firsts; /* Não Usado */
+
+
 const firsts mais_expressao_firsts;
 const firsts selecao_firsts;
 const firsts constantes_firsts;

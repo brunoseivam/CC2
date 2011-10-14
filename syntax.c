@@ -50,25 +50,6 @@ const firsts identificador_firsts =
    .other_firsts_list_size = 0
 };
 
-/* Autor: Acosta
-   primeiros(?) = {?}
-*/
-const firsts xis =
-{
-   .string_list      = (const char * const []){"algoritmo"},
-   .string_list_size = 1,
-
-   /*.tk_class_list    = (const token_class []){real_number, integer_number},
-   .tk_class_list_size = 2*/
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = (const firsts * const []){ &declaracao_global_firsts, &declaracao_local_firsts },
-   .other_firsts_list_size = 2
-};
-
-
 /*
 Automato 1
 Autor: Bruno
@@ -322,3 +303,172 @@ int exp_aritmetica()
 {
    return 0;
 }
+
+/*
+Automato 17
+Autor: Acosta
+
+<cmd_se> ::= se <expressao> entao <comandos> <senao_opcional> fim_se
+<senao_opcional> ::= senao <comandos> | ε
+*/
+
+int cmd_se()
+{
+	int ret;
+
+	CHECK_STRING(tk, "se");
+	tk = get_token();
+
+	CALL(expressao);
+
+	CHECK_STRING(tk, "entao");
+	tk = get_token();
+
+   if( strcmp(tk, "senao") == SUCCESS )
+	{
+		tk = get_token();
+		CALL(comandos);
+	}
+
+	CHECK_STRING(tk, "fim_se");
+
+   return SUCCESS;
+}
+
+/*
+Automato 18
+Autor: Acosta
+
+<cmd_caso> ::= caso <exp_aritmetica> seja <selecao> <senao_opcional> fim_caso
+<senao_opcional> ::= senao <comandos> | ε
+*/
+
+int cmd_caso()
+{
+	int ret;
+
+	CHECK_STRING(tk, "caso");
+	tk = get_token();
+
+	CALL(exp_aritmetica);
+
+	CHECK_STRING(tk, "seja");
+	tk = get_token();
+
+	CALL(selecao);
+
+   if( strcmp(tk, "senao") == SUCCESS )
+	{
+		tk = get_token();
+		CALL(comandos);
+	}
+
+	CHECK_STRING(tk, "fim_caso");
+
+   return SUCCESS;
+}
+
+
+/*
+Automato 19
+Autor: Acosta
+
+<cmd_para>  ::= para IDENT <- <exp_aritmetica> ate <exp_aritmetica> faca <comandos> fim_para
+*/
+
+int cmd_para()
+{
+	int ret;
+
+	CHECK_STRING(tk, "para");
+	tk = get_token();
+
+	CHECK_CLASS(tk, identifier);
+	tk = get_token();
+
+	CHECK_STRING(tk, "<-");
+	tk = get_token();
+
+	CALL(exp_aritmetica);
+
+	CHECK_STRING(tk, "ate");
+	tk = get_token();
+
+	CALL(exp_aritmetica);
+
+	CHECK_STRING(tk, "faca");
+	tk = get_token();
+
+	CALL(comandos);
+
+	CHECK_STRING(tk, "fim_para");
+	tk = get_token();
+
+   return SUCCESS;
+}
+
+
+/*
+Automato 20
+Autor: Acosta
+
+<cmd_enquanto> ::= enquanto <expressao> faca <comandos> fim_enquanto
+
+*/
+
+int cmd_enquanto()
+{
+	int ret;
+
+	CHECK_STRING(tk, "enquanto");
+	tk = get_token();
+
+	CALL(expressao);
+
+	CHECK_STRING(tk, "faca");
+	tk = get_token();
+
+	CALL(comandos);
+
+	CHECK_STRING(tk, "fim_enquanto");
+	tk = get_token();
+
+   return SUCCESS;
+}
+
+/*
+Automato 21
+Autor: Acosta
+
+<cmd_faca> ::= faca <comandos> ate <expressao>
+*/
+
+int cmd_faca()
+{
+	int ret;
+
+	CHECK_STRING(tk, "faca");
+	tk = get_token();
+
+	CALL(comandos);
+
+	CHECK_STRING(tk, "ate");
+	tk = get_token();
+
+	CALL(expressao);
+
+   return SUCCESS;
+}
+
+/*
+					Automato 22
+					    <cmd_pont_ident>                                | ^ IDENT <outros_ident> <dimensao> <- <expressao>
+
+						Automato 23
+						     <cmd_ident>                               | IDENT <chamada_atribuicao>
+							 29. <chamada_atribuicao>       ::= ( <expressao> <mais_expressao> ) | <outros_ident> <dimensao> <- <expressao>
+
+
+							 Automato 24
+							      <cmd_retorne>                               | retorne <expressao>
+									*/
