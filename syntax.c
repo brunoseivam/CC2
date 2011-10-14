@@ -87,6 +87,7 @@ int programa()
    CALL(comandos);
 
    CHECK_STRING(tk, "fim_algoritmo");
+   tk = get_token();
 
    return SUCCESS;
 }
