@@ -35,7 +35,7 @@
 
 /* Bruno */
 const firsts programa_firsts;          /* Não utilizado */
-const firsts declaracao_local_firsts;  /* Não utilizado */
+const firsts declaracao_local_firsts;
 const firsts variavel_firsts;
 const firsts identificador_firsts;
 const firsts outros_ident_firsts;      /* Não utilizado */
@@ -46,7 +46,7 @@ const firsts mais_ident_firsts;        /* Não utilizado */
 
 const firsts tipo_basico_firsts;
 const firsts tipo_estendido_firsts;
-const firsts declaracao_global_firsts;
+const firsts declaracao_global_firsts; /* Precisa! programa() consulta */
 const firsts parametro_firsts;
 const firsts declaracoes_locais_firsts;
 const firsts comandos_firsts;
