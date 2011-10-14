@@ -21,6 +21,23 @@ const firsts programa_firsts =
 };
 
 /* Autor: Bruno
+primeiros(declaracao_local) = { declare, constante, tipo }
+*/
+
+const firsts declaracao_local_firsts =
+{
+   .string_list      = (const char * const []){"delcare", "constante", "tipo"},
+   .string_list_size = 3,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = NULL,
+   .other_firsts_list_size = 0
+};
+
+
+/* Autor: Bruno
 primeiros(variavel) = primeiros(identificador);
 */
 const firsts variavel_firsts =
