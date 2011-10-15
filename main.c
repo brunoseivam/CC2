@@ -4,9 +4,25 @@
 
 void handle_error(int error)
 {
-   printf("handle error called %d\n", error);
-   return;
+	switch(error)
+	{
+		case NOTRECOGNIZED:
+			printf("Linha %d: %s - simbolo nao identificado\n",
+					line_number, tk->string);
+			break;
+
+		case COMMENTERROR:
+			printf("Linha %d: comentario nao fechado\n",
+					line_number);
+			break;
+
+		case SYNTAXERROR:
+			printf("Linha %d: erro sintatico proximo a %s\n",
+					line_number, tk->string);
+			break;
+	}
 }
+
 int main(int argc, char** argv)
 {
    int ret;
