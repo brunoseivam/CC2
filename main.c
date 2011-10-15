@@ -44,9 +44,8 @@ int main(int argc, char** argv)
    ret = programa();
    if(ret != SUCCESS)
       handle_error(ret);
-
-	/* Imprimir mensagem de Fim da compilacao aqui? */
-	printf("Fim da compilacao\n");
+   else
+		printf("Fim da compilacao\n"); /* Imprimir mensagem de Fim da compilacao aqui? */
    close_files();
 
 
