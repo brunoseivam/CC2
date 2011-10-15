@@ -39,7 +39,7 @@ const firsts declaracao_local_firsts =
 
 /* Autor: Bruno
 primeiros(variavel) = primeiros(identificador);
-*/
+
 const firsts variavel_firsts =
 {
    .string_list = NULL,
@@ -50,7 +50,7 @@ const firsts variavel_firsts =
 
    .other_firsts_list = (const firsts * const []) { &identificador_firsts },
    .other_firsts_list_size = 1
-};
+};*/
 
 /* Autor: Bruno
 primeiros(identificador) = { ^, IDENT}
@@ -111,8 +111,6 @@ Autor: Bruno
 
 int programa()
 {
-   int ret;
-
    while(1)
    {
       if(search_first(tk, declaracao_local_firsts) == SUCCESS)
@@ -153,8 +151,6 @@ Autor: Bruno
 */
 int declaracao_local()
 {
-   int ret;
-
    if( strcmp(tk->string, "declare") == SUCCESS )
    {
       tk = get_token();
@@ -206,8 +202,6 @@ Autor: Bruno
 */
 int variavel()
 {
-   int ret;
-
    CALL(identificador);
    CALL(mais_ident);
 
@@ -227,8 +221,6 @@ Autor: Bruno
 */
 int identificador()
 {
-   int ret;
-
    if( strcmp(tk->string, "^") == SUCCESS)
       tk = get_token();
 
@@ -267,7 +259,6 @@ Autor: Bruno
 */
 int dimensao()
 {
-   int ret;
    while( strcmp(tk->string, "[") == SUCCESS)
    {
       tk = get_token();
@@ -288,14 +279,13 @@ Autor: Bruno
 */
 int tipo()
 {
-   int ret;
    if( strcmp(tk->string, "registro") == SUCCESS)
    {
       tk = get_token();
 
       CALL(variavel);
 
-      while(search_first(tk, variavel_firsts) == SUCCESS)
+      while(search_first(tk, identificador_firsts) == SUCCESS)   /* Primeiros(variavel) = primeiros(identificador) */
          CALL(variavel);
 
       CHECK_STRING(tk, "fim_registro");
@@ -315,7 +305,6 @@ Autor: Bruno
 */
 int mais_ident()
 {
-   int ret;
    while( strcmp(tk->string, ",") == SUCCESS)
    {
       tk = get_token();
@@ -351,8 +340,6 @@ tipo_estentido ::=  ^ IDENT
 
 int tipo_estendido()
 {
-	int ret;
-
 	if ( strcmp(tk->string, "^") == SUCCESS )
 		tk = get_token();
 
@@ -377,8 +364,6 @@ Autor: Talita
 
 int declaracao_global()
 {
-	int ret;
-
 	if ( strcmp(tk->string, "procedimento") == SUCCESS )
 	{
 		tk = get_token();
@@ -446,8 +431,6 @@ Autor: Talita
 
 int parametro()
 {
-	int ret;
-
 	while(1)
 	{
 		if ( strcmp(tk->string, "var") == SUCCESS )
@@ -480,8 +463,6 @@ Autor: Talita
 
 int declaracoes_locais()
 {
-	int ret;
-
 	while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
 		CALL(declaracao_local);
 
@@ -499,8 +480,6 @@ Autor: Talita
 
 int comandos()
 {
-	int ret;
-
 	while ( search_first(tk, comandos_firsts) == SUCCESS )
 	{
 		if ( tk->class == identifier )
@@ -557,8 +536,6 @@ Autor: Talita
 
 int cmd_leia()
 {
-	int ret;
-
 	CHECK_STRING(tk, "leia");
 	tk = get_token();
 
@@ -583,8 +560,6 @@ Autor: Talita
 
 int cmd_escreva()
 {
-	int ret;
-
 	CHECK_STRING(tk, "escreva");
 	tk = get_token();
 
@@ -610,8 +585,6 @@ Autor: Acosta
 
 int cmd_se()
 {
-	int ret;
-
 	CHECK_STRING(tk, "se");
 	tk = get_token();
 
@@ -642,8 +615,6 @@ Autor: Acosta
 
 int cmd_caso()
 {
-	int ret;
-
 	CHECK_STRING(tk, "caso");
 	tk = get_token();
 
@@ -676,8 +647,6 @@ Autor: Acosta
 
 int cmd_para()
 {
-	int ret;
-
 	CHECK_STRING(tk, "para");
 	tk = get_token();
 
@@ -716,8 +685,6 @@ Autor: Acosta
 
 int cmd_enquanto()
 {
-	int ret;
-
 	CHECK_STRING(tk, "enquanto");
 	tk = get_token();
 
@@ -743,8 +710,6 @@ Autor: Acosta
 
 int cmd_faca()
 {
-	int ret;
-
 	CHECK_STRING(tk, "faca");
 	tk = get_token();
 
@@ -767,8 +732,6 @@ Autor: Acosta
 
 int cmd_pont_ident()
 {
-	int ret;
-
 	CHECK_STRING(tk, "^");
 	tk = get_token();
 
@@ -797,8 +760,6 @@ Autor: Acosta
 
 int cmd_ident()
 {
-	int ret;
-
 	CHECK_CLASS(tk, identifier);
 	tk = get_token();
 
@@ -836,8 +797,6 @@ Autor: Acosta
 
 int cmd_retorne()
 {
-	int ret;
-
 	CHECK_STRING(tk, "retorne");
 	tk = get_token();
 
