@@ -333,8 +333,6 @@ Autor: Talita
 
 int tipo_basico()
 {
-	int ret;
-
 	CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
 	tk = get_token();
 
