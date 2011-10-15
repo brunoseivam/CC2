@@ -2,21 +2,21 @@
 #include "lex.h"
 #include "syntax.h"
 
-void handle_error(int error)
+void handle_error()
 {
-	switch(error)
+   switch(tk->class)
 	{
-		case NOTRECOGNIZED:
+		case error1:
 			printf("Linha %d: %s - simbolo nao identificado\n",
 					line_number, tk->string);
 			break;
 
-		case COMMENTERROR:
+		case error2:
 			printf("Linha %d: comentario nao fechado\n",
 					line_number);
 			break;
 
-		case SYNTAXERROR:
+		default:
 			printf("Linha %d: erro sintatico proximo a %s\n",
 					line_number, tk->string);
 			break;
@@ -41,8 +41,7 @@ int main(int argc, char** argv)
 
    tk = get_token();
 
-   ret = programa();
-   if(ret != SUCCESS)
+   if(programa() != SUCCESS)
       handle_error(ret);
    else
 		printf("Fim da compilacao\n"); /* Imprimir mensagem de Fim da compilacao aqui? */
