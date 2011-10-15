@@ -26,7 +26,7 @@ primeiros(declaracao_local) = { declare, constante, tipo }
 
 const firsts declaracao_local_firsts =
 {
-   .string_list      = (const char * const []){"constante", "delcare",  "tipo"},
+   .string_list      = (const char * const []){"constante", "declare",  "tipo"},
    .string_list_size = 3,
 
    .tk_class_list    = NULL,
