@@ -102,6 +102,129 @@ const firsts comandos_firsts =
    .other_firsts_list = NULL,
    .other_firsts_list_size = 0
 };
+
+/* Autor: Marcos
+primeiros(mais_expressao) = { ',' }
+*/
+const firsts mais_expressao_firsts =
+{
+   .string_list = (const char * const []){","},
+   .string_list_size = 1,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = NULL,
+   .other_firsts_list_size = 0
+};
+
+/* Autor: Marcos
+primeiros(selecao) = { -, NUM_INT }
+*/
+const firsts selecao_firsts =
+{
+   .string_list = NULL,
+   .string_list_size = 0,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = (const firsts * const []){ &constantes_firsts },
+   .other_firsts_list_size = 1
+};
+
+/* Autor: Marcos
+primeiros(constantes) = { -, NUM_INT }
+*/
+const firsts constantes_firsts =
+{
+   .string_list = (const char * const []){"-"},
+   .string_list_size = 1,
+
+   .tk_class_list    = (const token_class []){ integer_number },
+   .tk_class_list_size = 1,
+
+   .other_firsts_list = NULL,
+   .other_firsts_list_size = 0
+};
+
+/* Autor: Marcos
+primeiros(exp_aritmetica) = { -, ^, IDENT, &, NUM_INT, NUM_REAL,(, CADEIA }
+*/
+const firsts exp_aritmetica_firsts =
+{
+   .string_list = NULL,
+   .string_list_size = 0,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = (const firsts * const []){ &parcela_firsts },
+   .other_firsts_list_size = 1
+};
+
+/* Autor: Marcos
+primeiros(termo) = { -, ^, IDENT, &, NUM_INT, NUM_REAL,(, CADEIA }
+*/
+const firsts termo_firsts =
+{
+   .string_list = NULL,
+   .string_list_size = 0,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = (const firsts * const []){ &parcela_firsts },
+   .other_firsts_list_size = 1
+};
+
+/* Autor: Marcos
+primeiros(outros_termos) = { +,- }
+*/
+const firsts outros_termos_firsts =
+{
+   .string_list = (const char * const []){"+","-"},
+   .string_list_size = 2,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = NULL,
+   .other_firsts_list_size = 0
+};
+
+/* Autor: Marcos
+primeiros(fator) = { -, ^, IDENT, &, NUM_INT, NUM_REAL,(, CADEIA }
+*/
+const firsts fator_firsts =
+{
+   .string_list = NULL,
+   .string_list_size = 0,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = (const firsts * const []){ &parcela_firsts },
+   .other_firsts_list_size = 1
+};
+
+/* Autor: Marcos
+primeiros(outros_fatores) = { *,/ }
+*/
+const firsts outros_fatores_firsts =
+{
+   .string_list = (const char * const []){"*","/"},
+   .string_list_size = 2,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = NULL,
+   .other_firsts_list_size = 0
+};
+
+
+
 /* Autor: Nathan
 primeiros(parcela) = {-,^,IDENT,NUM_INT,NUM_REAL,(,&,CADEIA};
 
@@ -986,6 +1109,206 @@ int cmd_retorne()
 }
 
 /*
+Automato 25
+Autor: Marcos
+
+<mais_expressao>                 ::= , <expressao> <mais_expressao>
+							       | ε
+*/
+
+int mais_expressao()
+{
+	int ret;
+
+	CHECK_STRING(tk,",");
+	while(strcmp(tk->string, ",") == SUCCESS)
+   {
+      tk = get_token();
+
+      CALL(expressao);
+   }
+
+	return SUCCESS;
+}
+
+/*
+Automato 26
+Autor: Marcos
+
+<selecao>                        ::= <constantes> : <comandos> <selecao>
+                                   | <constantes> : <comandos>
+*/
+
+int selecao()
+{
+	int ret;
+
+	while( search_first(tk,selecao_firsts) == SUCCESS)
+   {
+      CALL(constantes);
+
+	   CHECK_STRING(tk,":");
+	   tk = get_token();
+
+	   CALL(comandos);
+   }
+
+	return SUCCESS;
+}
+
+/*
+Automato 27
+Autor: Marcos
+
+<constantes>                      ::= NUM_INT .. - NUM_INT , <constantes>
+									| - NUM_INT .. NUM_INT , <constantes>
+									| - NUM_INT .. - NUM_INT , <constantes>
+									| NUM_INT .. NUM_INT , <constantes>
+									| - NUM_INT , <constantes>
+									| NUM_INT , <constantes>
+                                    | NUM_INT .. - NUM_INT
+									| - NUM_INT .. NUM_INT
+									| - NUM_INT .. - NUM_INT
+									| NUM_INT .. NUM_INT
+									| - NUM_INT
+									| NUM_INT
+*/
+
+int constantes()
+{
+	while(1)
+	{
+		if(strcmp(tk->string,"-") == SUCCESS)
+			tk = get_token();
+
+		CHECK_CLASS(tk,integer_number);
+		tk = get_token();
+		if(strcmp(tk->string,"..") == SUCCESS)
+		{
+			tk = get_token();
+			if(strcmp(tk->string,"-"))
+				tk = get_token();
+
+			CHECK_CLASS(tk,integer_number);
+			tk = get_token();
+
+			if(strcmp(tk->string,",") == SUCCESS)
+				tk = get_token();
+			else
+				break;
+		}
+		else
+		{
+			if(strcmp(tk->string,",") == SUCCESS)
+				tk = get_token();
+			else
+				break;
+		}
+
+	}
+
+	return SUCCESS;
+}
+
+/*
+Automato 28
+Autor: Marcos
+
+<exp_aritmetica>                 ::= <termo> <outros_termos>
+*/
+
+int exp_aritmetica()
+{
+   int ret;
+
+	CALL(termo);
+	CALL(outros_termos);
+
+	return SUCCESS;
+}
+
+/*
+Automato 29
+Autor: Marcos
+
+<termo>                          ::= <fator> <outros_fatores>
+*/
+
+int termo()
+{
+   int ret;
+
+	CALL(fator);
+	CALL(outros_fatores);
+
+	return SUCCESS;
+}
+
+/*
+Automato 30
+Autor: Marcos
+
+<outros_termos>                  ::= + <termo> <outros_termos>
+								   | - <termo> <outros_termos>
+								   | ε
+*/
+
+int outros_termos()
+{
+   int ret;
+
+	CHECK_STRINGS(tk,"+","-");
+	while(search_first(tk,outros_termos_firsts) == SUCCESS)
+   {
+	   tk = get_token();
+	   CALL(termo);
+   }
+
+	return SUCCESS;
+}
+
+/*
+Automato 31
+Autor: Marcos
+
+<fator>                          ::= <parcela> <outras_parcelas>
+*/
+
+int fator()
+{
+   int ret;
+
+	CALL(parcela);
+	CALL(outras_parcelas);
+
+	return SUCCESS;
+}
+
+/*
+Automato 32
+Autor: Marcos
+
+<outros_fatores>                 ::= * <fator> <outros_fatores>
+								   | / <fator> <outros_fatores>
+								   | e
+*/
+
+int outros_fatores()
+{
+   int ret;
+
+	CHECK_STRINGS(tk,"*","/");
+	while(search_first(tk,outros_fatores_firsts) == SUCCESS)
+   {
+      tk = get_token();
+      CALL(fator);
+   }
+
+   return SUCCESS;
+}
+
+
+/*
 Automato 33
 Autor: Nathan
 
@@ -1243,40 +1566,3 @@ int outros_fatores_logicos()
    }
    return SUCCESS;
 }
-
-
-
-/* DUMMY: TODO automata */
-int mais_expressao()
-{
-   return SUCCESS;
-}
-int selecao()
-{
-   return SUCCESS;
-}
-int constantes()
-{
-   return SUCCESS;
-}
-int exp_aritmetica()
-{
-   return SUCCESS;
-}
-int termo()
-{
-   return SUCCESS;
-}
-int outros_termos()
-{
-   return SUCCESS;
-}
-int fator()
-{
-   return SUCCESS;
-}
-int outros_fatores()
-{
-   return SUCCESS;
-}
-
