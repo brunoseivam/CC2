@@ -1079,6 +1079,7 @@ Autor: Nathan
 
 int outras_parcelas()
 {
+   int ret;
    while(strcmp(tk->string,"%") == SUCCESS)
    {
       tk = get_token();
@@ -1103,6 +1104,7 @@ Autor: Nathan
 
 int chamada_partes()
 {
+   int ret;
    if(strcmp(tk->string,"(") == SUCCESS)
    {
       tk = get_token();
@@ -1139,6 +1141,7 @@ Autor: Nathan
 
 int parcela_logica()
 {
+   int ret;
    if(strcmp(tk->string,"verdadeiro") == SUCCESS || strcmp(tk->string,"falso") == SUCCESS)
    {
       tk = get_token();
@@ -1167,6 +1170,7 @@ Autor: Nathan
 */
 int expressao()
 {
+   int ret;
    CALL(termo_logico);
    CALL(outros_termos_logicos);
 
@@ -1184,6 +1188,7 @@ Autor: Nathan
 
 int termo_logico()
 {
+   int ret;
    if(strcmp(tk->string,"nao") == SUCCESS)
       tk = get_token();
 
@@ -1205,6 +1210,7 @@ Autor: Nathan
 
 int outros_termos_logicos()
 {
+   int ret;
    while(strcmp(tk->string,"ou") == SUCCESS)
    {
       tk = get_token();
@@ -1225,6 +1231,7 @@ Autor: Nathan
 
 int outros_fatores_logicos()
 {
+   int ret;
    while(strcmp(tk->string,"e") == SUCCESS)
    {
       tk = get_token();
