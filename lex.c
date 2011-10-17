@@ -57,8 +57,9 @@ token* get_token()
    /* Fim de arquivo */
    else if(ISEOF(c))
    {
-      tk->string = (char* )malloc(sizeof(char));
-      tk->string = '\0';
+      --line_number;                   /* Motivo de discórdia. EOF aparece sempre depois de \n ? */
+      tk->string = (char* )malloc(4*sizeof(char));
+      strcpy(tk->string, "EOF");
       tk->class = eof;
    }
    else                                /* Caractere não reconhecido */
@@ -169,7 +170,7 @@ int aut_comment         (token* tk)
       {
          tk->class = error2;                       /* Comentario não fechado                                               */
          tk->string = (char*)malloc(sizeof(char));
-         tk->string = '\0';
+         tk->string[0] = '\0';
          ++line_number;                            /* Motivo de discórdia. Não deveria ser no reconhecdor de whitespace?   */
          return COMMENTERROR;
       }

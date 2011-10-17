@@ -1,22 +1,24 @@
 #!/bin/bash
 
-folder="T1_arquivos_teste"
+folder1="T2_arquivos_teste/arquivos_sem_erros"
+folder2="T2_arquivos_teste/arquivos_com_1_erro"
 
-gcc -Wall -pedantic -std=c99 syntax.c lex.c main.c common.c -o main.out
-exit
+gcc -Wall common.c lex.c syntax.c main.c -o parser
 
-
-
-
-
-gcc -Wall -pedantic -ansi -o $prog.out $prog.c
-
-for i in $(ls $folder/entrada)
+for i in $(ls $folder1/entrada)
 do
-	$prog.out $folder/entrada/$i $i
-	diff $i $folder/saida/$i
+	./parser $folder1/entrada/$i $i
+	diff $i $folder1/saida/$i
 	rm $i
 done
+
+for i in $(ls $folder2/entrada)
+do
+	./parser $folder2/entrada/$i $i
+	diff $i $folder2/saida/$i
+	rm $i
+done
+
 exit
 
 

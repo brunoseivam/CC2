@@ -7,17 +7,17 @@ void handle_error()
    switch(tk->class)
 	{
 		case error1:
-			printf("Linha %d: %s - simbolo nao identificado\n",
+			fprintf(out_file, "Linha %d: %s - simbolo nao identificado\n",
 					line_number, tk->string);
 			break;
 
 		case error2:
-			printf("Linha %d: comentario nao fechado\n",
+			fprintf(out_file, "Linha %d: comentario nao fechado\n",
 					line_number);
 			break;
 
 		default:
-			printf("Linha %d: erro sintatico proximo a %s\n",
+			fprintf(out_file, "Linha %d: erro sintatico proximo a %s\n",
 					line_number, tk->string);
 			break;
 	}
@@ -43,8 +43,8 @@ int main(int argc, char** argv)
 
    if((ret = programa()) != SUCCESS)
       handle_error(ret);
-   else
-		printf("Fim da compilacao\n"); /* Imprimir mensagem de Fim da compilacao aqui? */
+
+   fprintf(out_file, "Fim da compilacao\n"); /* Imprimir mensagem de Fim da compilacao aqui? */
    close_files();
 
 

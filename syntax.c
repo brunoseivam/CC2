@@ -103,6 +103,22 @@ const firsts comandos_firsts =
    .other_firsts_list_size = 0
 };
 
+/* Autor: Talita
+primeiros(declaracao_global) = {funcao, procedimento}
+*/
+
+const firsts declaracao_global_firsts =
+{
+   .string_list = (const char * const []){"funcao", "procedimento"},
+   .string_list_size = 2,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = NULL,
+   .other_firsts_list_size = 0
+};
+
 /* Autor: Marcos
 primeiros(mais_expressao) = { ',' }
 */
@@ -546,6 +562,7 @@ Automato 7
 Autor: Bruno
 <tipo>                              ::= registro <variavel> <mais_variaveis> fim_registro
                                      | <tipo_estendido>
+
 <mais_variaveis>                    ::= <variavel> <mais_variaveis> | ε
 */
 int tipo()
@@ -555,12 +572,13 @@ int tipo()
    {
       tk = get_token();
 
-      CALL(variavel);
-
-      while(search_first(tk, identificador_firsts) == SUCCESS)   /* Primeiros(variavel) = primeiros(identificador) */
+      do
+      {
          CALL(variavel);
+      } while(search_first(tk, identificador_firsts) == SUCCESS);   /* Primeiros(variavel) = primeiros(identificador) */
 
       CHECK_STRING(tk, "fim_registro");
+      tk = get_token();
    }
    else
    {
@@ -866,8 +884,8 @@ int cmd_escreva()
 Automato 17
 Autor: Lucas
 
-<cmd_se> ::= se <expressao> entao <comandos> <senao_opcional> fim_se
-<senao_opcional> ::= senao <comandos> | ε
+<cmd_se> ::= se <expressao> entao <comandos> senao <comandos> fim_se
+             se <expressao> entao <comandos> fim_se
 */
 
 int cmd_se()
@@ -881,6 +899,8 @@ int cmd_se()
 
    CHECK_STRING(tk, "entao");
    tk = get_token();
+
+   CALL(comandos);
 
    if( strcmp(tk->string, "senao") == SUCCESS )
    {
@@ -1120,11 +1140,9 @@ int mais_expressao()
 {
 	int ret;
 
-	CHECK_STRING(tk,",");
 	while(strcmp(tk->string, ",") == SUCCESS)
    {
       tk = get_token();
-
       CALL(expressao);
    }
 
@@ -1160,18 +1178,18 @@ int selecao()
 Automato 27
 Autor: Marcos
 
-<constantes>                      ::= NUM_INT .. - NUM_INT , <constantes>
+<constantes>             ::=   NUM_INT .. - NUM_INT , <constantes>
 									| - NUM_INT .. NUM_INT , <constantes>
 									| - NUM_INT .. - NUM_INT , <constantes>
-									| NUM_INT .. NUM_INT , <constantes>
+									|   NUM_INT .. NUM_INT , <constantes>
 									| - NUM_INT , <constantes>
-									| NUM_INT , <constantes>
-                                    | NUM_INT .. - NUM_INT
+									|   NUM_INT , <constantes>
+                           |   NUM_INT .. - NUM_INT
 									| - NUM_INT .. NUM_INT
 									| - NUM_INT .. - NUM_INT
-									| NUM_INT .. NUM_INT
+									|   NUM_INT .. NUM_INT
 									| - NUM_INT
-									| NUM_INT
+									|   NUM_INT
 */
 
 int constantes()
@@ -1183,10 +1201,12 @@ int constantes()
 
 		CHECK_CLASS(tk,integer_number);
 		tk = get_token();
+
 		if(strcmp(tk->string,"..") == SUCCESS)
 		{
 			tk = get_token();
-			if(strcmp(tk->string,"-"))
+
+			if(strcmp(tk->string,"-") == SUCCESS)
 				tk = get_token();
 
 			CHECK_CLASS(tk,integer_number);
@@ -1197,13 +1217,10 @@ int constantes()
 			else
 				break;
 		}
-		else
-		{
-			if(strcmp(tk->string,",") == SUCCESS)
-				tk = get_token();
-			else
-				break;
-		}
+		else if(strcmp(tk->string,",") == SUCCESS)
+			tk = get_token();
+      else
+         break;
 	}
 	return SUCCESS;
 }
@@ -1255,13 +1272,11 @@ int outros_termos()
 {
    int ret;
 
-	CHECK_STRINGS(tk,"+","-");
-	while(search_first(tk,outros_termos_firsts) == SUCCESS)
+	while(strcmp(tk->string, "+") == SUCCESS || strcmp(tk->string, "-") == SUCCESS)
    {
 	   tk = get_token();
 	   CALL(termo);
    }
-
 	return SUCCESS;
 }
 
@@ -1295,13 +1310,11 @@ int outros_fatores()
 {
    int ret;
 
-	CHECK_STRINGS(tk,"*","/");
-	while(search_first(tk,outros_fatores_firsts) == SUCCESS)
+	while(strcmp(tk->string, "*") ==  SUCCESS || strcmp(tk->string, "/") == SUCCESS)
    {
       tk = get_token();
       CALL(fator);
    }
-
    return SUCCESS;
 }
 
