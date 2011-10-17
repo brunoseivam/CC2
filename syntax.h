@@ -36,50 +36,54 @@
 /* Bruno */
 const firsts programa_firsts;          /* Não utilizado */
 const firsts declaracao_local_firsts;
-const firsts variavel_firsts;
+const firsts variavel_firsts;          /* Codificado no autômato */
 const firsts identificador_firsts;
-const firsts outros_ident_firsts;      /* Não utilizado */
-const firsts dimensao_firsts;          /* Não utilizado */
+const firsts outros_ident_firsts;      /* Codificado no autômato */
+const firsts dimensao_firsts;          /* Codificado no autômato */
 const firsts tipo_firsts;              /* Não utilizado */
 const firsts mais_ident_firsts;        /* Não utilizado */
 
-const firsts tipo_basico_firsts;
-const firsts tipo_estendido_firsts;
-const firsts declaracao_global_firsts; /* Precisa! programa() consulta */
+/* Talita */
+const firsts tipo_basico_firsts;       /* Não utilizado */
+const firsts tipo_estendido_firsts;    /* Não utilizado */
+const firsts declaracao_global_firsts;
 const firsts parametro_firsts;
-const firsts declaracoes_locais_firsts;
+const firsts declaracoes_locais_firsts;/* Não utilizado */
 const firsts comandos_firsts;
-const firsts cmd_leia_firsts;
-const firsts cmd_escreva_firsts;
+const firsts cmd_leia_firsts;          /* Codificado no autômato */
+const firsts cmd_escreva_firsts;       /* Codificado no autômato */
 
-/* Acosta */
-const firsts cmd_se_firsts;            /* Não Usado */
-const firsts cmd_caso_firsts;          /* Não Usado */
-const firsts cmd_para_firsts;          /* Não Usado */
-const firsts cmd_enquanto_firsts;      /* Não Usado */
-const firsts cmd_faca_firsts;          /* Não Usado */
-const firsts cmd_pont_ident_firsts;    /* Não Usado */
-const firsts cmd_ident_firsts;         /* Não Usado */
-const firsts cmd_retorne_firsts;       /* Não Usado */
+/* Lucas */
+const firsts cmd_se_firsts;            /* Codificado no autômato */
+const firsts cmd_caso_firsts;          /* Codificado no autômato */
+const firsts cmd_para_firsts;          /* Codificado no autômato */
+const firsts cmd_enquanto_firsts;      /* Codificado no autômato */
+const firsts cmd_faca_firsts;          /* Codificado no autômato */
+const firsts cmd_pont_ident_firsts;    /* Codificado no autômato */
+const firsts cmd_ident_firsts;         /* Codificado no autômato */
+const firsts cmd_retorne_firsts;       /* Codificado no autômato */
 
-
-const firsts mais_expressao_firsts;
-const firsts selecao_firsts;
-const firsts constantes_firsts;
+/* Marcos */
+const firsts mais_expressao_firsts;    /* Não utilizado */
+const firsts selecao_firsts;           /* Não utilizado */
+const firsts constantes_firsts;        /* Não utilizado */
 const firsts exp_aritmetica_firsts;
-const firsts termo_firsts;
-const firsts outros_termos_firsts;
-const firsts fator_firsts;
-const firsts outros_fatores_firsts;
-const firsts parcela_firsts;
-const firsts outras_parcelas_firsts;
-const firsts chamada_partes_firsts;
-const firsts parcela_logica_firsts;
-const firsts expressao_firsts;
-const firsts termo_logico_firsts;
-const firsts outros_termos_logicos_firsts;
-const firsts outros_fatores_logicos_firsts;
+const firsts termo_firsts;             /* Não utilizado */
+const firsts outros_termos_firsts;     /* Não utilizado */
+const firsts fator_firsts;             /* Não utilizado */
+const firsts outros_fatores_firsts;    /* Não utilizado */
 
+/* Nathan */
+const firsts parcela_firsts;           /* Não utilizado */
+const firsts outras_parcelas_firsts;   /* Não utilizado */
+const firsts chamada_partes_firsts;    /* Não utilizado */
+const firsts parcela_logica_firsts;    /* Não utilizado */
+const firsts expressao_firsts;         /* Não utilizado */
+const firsts termo_logico_firsts;      /* Não utilizado */
+const firsts outros_termos_logicos_firsts;   /* Não utilizado */
+const firsts outros_fatores_logicos_firsts;  /* Não utilizado */
+
+/* Bruno */
 int programa();
 int declaracao_local();
 int variavel();
@@ -88,6 +92,8 @@ int outros_ident();
 int dimensao();
 int tipo();
 int mais_ident();
+
+/* Talita */
 int tipo_basico();
 int tipo_estendido();
 int declaracao_global();
@@ -96,6 +102,8 @@ int declaracoes_locais();
 int comandos();
 int cmd_leia();
 int cmd_escreva();
+
+/* Lucas */
 int cmd_se();
 int cmd_caso();
 int cmd_para();
@@ -104,6 +112,8 @@ int cmd_faca();
 int cmd_pont_ident();
 int cmd_ident();
 int cmd_retorne();
+
+/* Marcos */
 int mais_expressao();
 int selecao();
 int constantes();
@@ -112,6 +122,8 @@ int termo();
 int outros_termos();
 int fator();
 int outros_fatores();
+
+/* Nathan */
 int parcela();
 int outras_parcelas();
 int chamada_partes();

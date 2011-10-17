@@ -3,22 +3,29 @@
 
 #include "syntax.h"
 
+/* Firsts não utilizados estão comentados
+   Caso a estrutura first contenha apenas uma string OU
+     uma token_class OU um ponteiro ficou decidido que
+     seria codificado diretamente no autômato */
+
+
 /* Declaração de todos os firsts estritamente C99.
 Fonte: http://stackoverflow.com/questions/3875523/lookup-table-in-c */
+
+
+/*
 const firsts programa_firsts =
 {
    .string_list      = (const char * const []){"algoritmo"},
    .string_list_size = 1,
-
-   /*.tk_class_list    = (const token_class []){real_number, integer_number},
-   .tk_class_list_size = 2*/
 
    .tk_class_list    = NULL,
    .tk_class_list_size = 0,
 
    .other_firsts_list = (const firsts * const []){ &declaracao_global_firsts, &declaracao_local_firsts },
    .other_firsts_list_size = 2
-};
+};*/
+
 
 /* Autor: Bruno
 primeiros(declaracao_local) = { declare, constante, tipo }
@@ -95,8 +102,140 @@ const firsts comandos_firsts =
    .other_firsts_list = NULL,
    .other_firsts_list_size = 0
 };
+/* Autor: Nathan
+primeiros(parcela) = {-,^,IDENT,NUM_INT,NUM_REAL,(,&,CADEIA};
+
+const firsts parcela_firsts =
+{
+   .string_list      = (const char * const []){"&","(","-","^"},
+   .string_list_size = 4,
+
+   .tk_class_list    = (const token_class []){identifier,string,real_number,integer_number},
+   .tk_class_list_size = 4,
+
+   .other_firsts_list = NULL,
+   .other_firsts_list_size = 0
+};
+*/
+
+/* Autor: Nathan
+primeiros(outras_parcelas) = {%};
 
 
+const firsts outras_parcelas_firsts =
+{
+   .string_list      = (const char * const []){"%"},
+   .string_list_size = 1,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = NULL,
+   .other_firsts_list_size = 0
+};
+*/
+
+/* Autor: Nathan
+primeiros(chamada_partes) = {(,.,[};
+
+
+const firsts chamada_partes_firsts =
+{
+   .string_list      = (const char * const []){"(",".","["},
+   .string_list_size = 3,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = NULL,
+   .other_firsts_list_size = 0
+};
+*/
+
+/* Autor: Nathan
+primeiros(parcela_logica) = {verdadeiro,falso,primeiros(exp_aritmetica));
+
+
+const firsts parcela_logica_firsts =
+{
+   .string_list      = (const char * const []){"falso","verdadeiro"},
+   .string_list_size = 2,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = (const firsts * const []){ &exp_aritmetica_firsts},
+   .other_firsts_list_size = 1
+};
+*/
+
+/* Autor: Nathan
+primeiros(expressao) = primeiros(termo_logico);
+
+
+const firsts expressao_firsts =
+{
+   .string_list      = NULL,
+   .string_list_size = 0,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = (const firsts * const []){ &termo_logico_firsts},
+   .other_firsts_list_size = 1
+};
+*/
+
+/* Autor: Nathan
+primeiros(termo_logico) = {nao,primeiros(parcela_logica)};
+
+
+const firsts termo_logico_firsts =
+{
+   .string_list      = (const char * const []){"nao"},
+   .string_list_size = 1,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = (const firsts * const []){ &parcela_logica_firsts},
+   .other_firsts_list_size = 1
+};
+*/
+
+/* Autor: Nathan
+primeiros(outros_termos_logicos) = {ou};
+
+
+const firsts outros_termos_logicos_firsts =
+{
+   .string_list      = (const char * const []){"ou"},
+   .string_list_size = 1,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = NULL,
+   .other_firsts_list_size = 0
+};
+*/
+
+/* Autor: Nathan
+primeiros(outros_fatores_logicos) = {e};
+
+
+const firsts outros_fatores_logicos_firsts =
+{
+   .string_list      = (const char * const []){"e"},
+   .string_list_size = 1,
+
+   .tk_class_list    = NULL,
+   .tk_class_list_size = 0,
+
+   .other_firsts_list = NULL,
+   .other_firsts_list_size = 0
+};
+*/
 
 
 /*
@@ -333,8 +472,8 @@ Autor: Talita
 
 int tipo_basico()
 {
-	CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
-	tk = get_token();
+   CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
+   tk = get_token();
 
    return SUCCESS;
 }
@@ -344,22 +483,22 @@ Automato 10
 Autor: Talita
 
 tipo_estentido ::=  ^ IDENT
-						| ^ tipo_basico
-						| IDENT
-						| tipo_basico
+                  | ^ tipo_basico
+                  | IDENT
+                  | tipo_basico
 */
 
 int tipo_estendido()
 {
-	int ret;
+   int ret;
 
-	if ( strcmp(tk->string, "^") == SUCCESS )
-		tk = get_token();
+   if ( strcmp(tk->string, "^") == SUCCESS )
+      tk = get_token();
 
-	if ( tk->class == identifier )
-		tk = get_token();
-	else
-		CALL(tipo_basico);
+   if ( tk->class == identifier )
+      tk = get_token();
+   else
+      CALL(tipo_basico);
 
    return SUCCESS;
 }
@@ -377,57 +516,57 @@ Autor: Talita
 
 int declaracao_global()
 {
-	int ret;
+   int ret;
 
-	if ( strcmp(tk->string, "procedimento") == SUCCESS )
-	{
-		tk = get_token();
+   if ( strcmp(tk->string, "procedimento") == SUCCESS )
+   {
+      tk = get_token();
 
-		CHECK_CLASS(tk, identifier);
-		tk = get_token();
+      CHECK_CLASS(tk, identifier);
+      tk = get_token();
 
-		CHECK_STRING(tk, "(");
-		tk = get_token();
+      CHECK_STRING(tk, "(");
+      tk = get_token();
 
-		if ( search_first(tk, parametro_firsts) == SUCCESS )
-			CALL(parametro);
+      if ( search_first(tk, parametro_firsts) == SUCCESS )
+         CALL(parametro);
 
-		CHECK_STRING(tk, ")");
-		tk = get_token();
+      CHECK_STRING(tk, ")");
+      tk = get_token();
 
-		CALL(declaracoes_locais);
-		CALL(comandos);
+      CALL(declaracoes_locais);
+      CALL(comandos);
 
-		CHECK_STRING(tk, "fim_procedimento");
-		tk = get_token();
+      CHECK_STRING(tk, "fim_procedimento");
+      tk = get_token();
 
-	}
-	else if ( strcmp(tk->string, "funcao") == SUCCESS )
-	{
-		tk = get_token();
+   }
+   else if ( strcmp(tk->string, "funcao") == SUCCESS )
+   {
+      tk = get_token();
 
-		CHECK_CLASS(tk, identifier);
-		tk = get_token();
+      CHECK_CLASS(tk, identifier);
+      tk = get_token();
 
-		CHECK_STRING(tk, "(");
-		tk = get_token();
+      CHECK_STRING(tk, "(");
+      tk = get_token();
 
-		if ( search_first(tk, parametro_firsts) == SUCCESS )
-			CALL(parametro);
+      if ( search_first(tk, parametro_firsts) == SUCCESS )
+         CALL(parametro);
 
-		CHECK_STRING(tk, ")");
-		tk = get_token();
+      CHECK_STRING(tk, ")");
+      tk = get_token();
 
-		CHECK_STRING(tk, ":");
-		tk = get_token();
+      CHECK_STRING(tk, ":");
+      tk = get_token();
 
-		CALL(tipo_estendido);
-		CALL(declaracoes_locais);
-		CALL(comandos);
+      CALL(tipo_estendido);
+      CALL(declaracoes_locais);
+      CALL(comandos);
 
-		CHECK_STRING(tk, "fim_funcao");
-		tk = get_token();
-	}
+      CHECK_STRING(tk, "fim_funcao");
+      tk = get_token();
+   }
 
    return SUCCESS;
 }
@@ -446,28 +585,28 @@ Autor: Talita
 
 int parametro()
 {
-	int ret;
+   int ret;
 
-	while(1)
-	{
-		if ( strcmp(tk->string, "var") == SUCCESS )
-			tk = get_token();
+   while(1)
+   {
+      if ( strcmp(tk->string, "var") == SUCCESS )
+         tk = get_token();
 
-		CALL(identificador);
-		CALL(mais_ident);
+      CALL(identificador);
+      CALL(mais_ident);
 
-		CHECK_STRING(tk, ":");
-		tk = get_token();
+      CHECK_STRING(tk, ":");
+      tk = get_token();
 
-		CALL(tipo_estendido);
+      CALL(tipo_estendido);
 
-		if ( strcmp(tk->string, ",") != SUCCESS )
-			break;
+      if ( strcmp(tk->string, ",") != SUCCESS )
+         break;
 
-		tk = get_token();
-	}
+      tk = get_token();
+   }
 
-	return SUCCESS;
+   return SUCCESS;
 }
 
 /*
@@ -480,10 +619,10 @@ Autor: Talita
 
 int declaracoes_locais()
 {
-	int ret;
+   int ret;
 
-	while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
-		CALL(declaracao_local);
+   while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
+      CALL(declaracao_local);
 
    return SUCCESS;
 }
@@ -493,57 +632,57 @@ Automato 14
 Autor: Talita
 
 <comandos> ::=  <cmd_leia> <comandos> | <cmd_escreva> <comandos> | <cmd_se> <comandos> | <cmd_caso> <comandos>
-				  | <cmd_para> <comandos> | <cmd_enquanto> <comandos> | <cmd_faca> <comandos> | <cmd_pont_ident> <comandos>
-				  | <cmd_ident> <comandos> | retorne <expressao> <comandos> | ε
+              | <cmd_para> <comandos> | <cmd_enquanto> <comandos> | <cmd_faca> <comandos> | <cmd_pont_ident> <comandos>
+              | <cmd_ident> <comandos> | retorne <expressao> <comandos> | ε
 */
 
 int comandos()
 {
-	int ret;
+   int ret;
 
-	while ( search_first(tk, comandos_firsts) == SUCCESS )
-	{
-		if ( tk->class == identifier )
-		{
-			CALL(cmd_ident);
-		}
-		else if ( strcmp(tk->string, "leia") == SUCCESS )
-		{
-			CALL(cmd_leia);
-		}
-		else if ( strcmp(tk->string, "escreva" ) == SUCCESS )
-		{
-			CALL(cmd_escreva);
-		}
-		else if ( strcmp(tk->string, "se" ) == SUCCESS )
-		{
-			CALL(cmd_se);
-		}
-		else if ( strcmp(tk->string, "caso" ) == SUCCESS )
-		{
-			CALL(cmd_caso);
-		}
-		else if ( strcmp(tk->string, "para" ) == SUCCESS )
-		{
-			CALL(cmd_para);
-		}
-		else if ( strcmp(tk->string, "enquanto" ) == SUCCESS )
-		{
-			CALL(cmd_enquanto);
-		}
-		else if ( strcmp(tk->string, "faca" ) == SUCCESS )
-		{
-			CALL(cmd_faca);
-		}
-		else if ( strcmp(tk->string, "retorne" ) == SUCCESS )
-		{
-			CALL(cmd_retorne);
-		}
-		else /* tk->string = ^ */
-		{
-			CALL(cmd_pont_ident);
-		}
-	}
+   while ( search_first(tk, comandos_firsts) == SUCCESS )
+   {
+      if ( tk->class == identifier )
+      {
+         CALL(cmd_ident);
+      }
+      else if ( strcmp(tk->string, "leia") == SUCCESS )
+      {
+         CALL(cmd_leia);
+      }
+      else if ( strcmp(tk->string, "escreva" ) == SUCCESS )
+      {
+         CALL(cmd_escreva);
+      }
+      else if ( strcmp(tk->string, "se" ) == SUCCESS )
+      {
+         CALL(cmd_se);
+      }
+      else if ( strcmp(tk->string, "caso" ) == SUCCESS )
+      {
+         CALL(cmd_caso);
+      }
+      else if ( strcmp(tk->string, "para" ) == SUCCESS )
+      {
+         CALL(cmd_para);
+      }
+      else if ( strcmp(tk->string, "enquanto" ) == SUCCESS )
+      {
+         CALL(cmd_enquanto);
+      }
+      else if ( strcmp(tk->string, "faca" ) == SUCCESS )
+      {
+         CALL(cmd_faca);
+      }
+      else if ( strcmp(tk->string, "retorne" ) == SUCCESS )
+      {
+         CALL(cmd_retorne);
+      }
+      else /* tk->string = ^ */
+      {
+         CALL(cmd_pont_ident);
+      }
+   }
 
    return SUCCESS;
 }
@@ -557,21 +696,21 @@ Autor: Talita
 
 int cmd_leia()
 {
-	int ret;
+   int ret;
 
-	CHECK_STRING(tk, "leia");
-	tk = get_token();
+   CHECK_STRING(tk, "leia");
+   tk = get_token();
 
-	CHECK_STRING(tk, "(");
-	tk = get_token();
+   CHECK_STRING(tk, "(");
+   tk = get_token();
 
-	CALL(identificador);
-	CALL(mais_ident);
+   CALL(identificador);
+   CALL(mais_ident);
 
-	CHECK_STRING(tk, ")");
-	tk = get_token();
+   CHECK_STRING(tk, ")");
+   tk = get_token();
 
-	return SUCCESS;
+   return SUCCESS;
 }
 
 /*
@@ -583,26 +722,26 @@ Autor: Talita
 
 int cmd_escreva()
 {
-	int ret;
+   int ret;
 
-	CHECK_STRING(tk, "escreva");
-	tk = get_token();
+   CHECK_STRING(tk, "escreva");
+   tk = get_token();
 
-	CHECK_STRING(tk, "(");
-	tk = get_token();
+   CHECK_STRING(tk, "(");
+   tk = get_token();
 
-	CALL(expressao);
-	CALL(mais_expressao);
+   CALL(expressao);
+   CALL(mais_expressao);
 
-	CHECK_STRING(tk, ")");
-	tk = get_token();
+   CHECK_STRING(tk, ")");
+   tk = get_token();
 
-	return SUCCESS;
+   return SUCCESS;
 }
 
 /*
 Automato 17
-Autor: Acosta
+Autor: Lucas
 
 <cmd_se> ::= se <expressao> entao <comandos> <senao_opcional> fim_se
 <senao_opcional> ::= senao <comandos> | ε
@@ -610,31 +749,31 @@ Autor: Acosta
 
 int cmd_se()
 {
-	int ret;
+   int ret;
 
-	CHECK_STRING(tk, "se");
-	tk = get_token();
+   CHECK_STRING(tk, "se");
+   tk = get_token();
 
-	CALL(expressao);
+   CALL(expressao);
 
-	CHECK_STRING(tk, "entao");
-	tk = get_token();
+   CHECK_STRING(tk, "entao");
+   tk = get_token();
 
    if( strcmp(tk->string, "senao") == SUCCESS )
-	{
-		tk = get_token();
-		CALL(comandos);
-	}
+   {
+      tk = get_token();
+      CALL(comandos);
+   }
 
-	CHECK_STRING(tk, "fim_se");
-	tk = get_token();
+   CHECK_STRING(tk, "fim_se");
+   tk = get_token();
 
    return SUCCESS;
 }
 
 /*
 Automato 18
-Autor: Acosta
+Autor: Lucas
 
 <cmd_caso> ::= caso <exp_aritmetica> seja <selecao> <senao_opcional> fim_caso
 <senao_opcional> ::= senao <comandos> | ε
@@ -642,26 +781,26 @@ Autor: Acosta
 
 int cmd_caso()
 {
-	int ret;
+   int ret;
 
-	CHECK_STRING(tk, "caso");
-	tk = get_token();
+   CHECK_STRING(tk, "caso");
+   tk = get_token();
 
-	CALL(exp_aritmetica);
+   CALL(exp_aritmetica);
 
-	CHECK_STRING(tk, "seja");
-	tk = get_token();
+   CHECK_STRING(tk, "seja");
+   tk = get_token();
 
-	CALL(selecao);
+   CALL(selecao);
 
    if( strcmp(tk->string, "senao") == SUCCESS )
-	{
-		tk = get_token();
-		CALL(comandos);
-	}
+   {
+      tk = get_token();
+      CALL(comandos);
+   }
 
-	CHECK_STRING(tk, "fim_caso");
-	tk = get_token();
+   CHECK_STRING(tk, "fim_caso");
+   tk = get_token();
 
    return SUCCESS;
 }
@@ -669,38 +808,38 @@ int cmd_caso()
 
 /*
 Automato 19
-Autor: Acosta
+Autor: Lucas
 
 <cmd_para>  ::= para IDENT <- <exp_aritmetica> ate <exp_aritmetica> faca <comandos> fim_para
 */
 
 int cmd_para()
 {
-	int ret;
+   int ret;
 
-	CHECK_STRING(tk, "para");
-	tk = get_token();
+   CHECK_STRING(tk, "para");
+   tk = get_token();
 
-	CHECK_CLASS(tk, identifier);
-	tk = get_token();
+   CHECK_CLASS(tk, identifier);
+   tk = get_token();
 
-	CHECK_STRING(tk, "<-");
-	tk = get_token();
+   CHECK_STRING(tk, "<-");
+   tk = get_token();
 
-	CALL(exp_aritmetica);
+   CALL(exp_aritmetica);
 
-	CHECK_STRING(tk, "ate");
-	tk = get_token();
+   CHECK_STRING(tk, "ate");
+   tk = get_token();
 
-	CALL(exp_aritmetica);
+   CALL(exp_aritmetica);
 
-	CHECK_STRING(tk, "faca");
-	tk = get_token();
+   CHECK_STRING(tk, "faca");
+   tk = get_token();
 
-	CALL(comandos);
+   CALL(comandos);
 
-	CHECK_STRING(tk, "fim_para");
-	tk = get_token();
+   CHECK_STRING(tk, "fim_para");
+   tk = get_token();
 
    return SUCCESS;
 }
@@ -708,7 +847,7 @@ int cmd_para()
 
 /*
 Automato 20
-Autor: Acosta
+Autor: Lucas
 
 <cmd_enquanto> ::= enquanto <expressao> faca <comandos> fim_enquanto
 
@@ -716,156 +855,421 @@ Autor: Acosta
 
 int cmd_enquanto()
 {
-	int ret;
+   int ret;
 
-	CHECK_STRING(tk, "enquanto");
-	tk = get_token();
+   CHECK_STRING(tk, "enquanto");
+   tk = get_token();
 
-	CALL(expressao);
+   CALL(expressao);
 
-	CHECK_STRING(tk, "faca");
-	tk = get_token();
+   CHECK_STRING(tk, "faca");
+   tk = get_token();
 
-	CALL(comandos);
+   CALL(comandos);
 
-	CHECK_STRING(tk, "fim_enquanto");
-	tk = get_token();
+   CHECK_STRING(tk, "fim_enquanto");
+   tk = get_token();
 
    return SUCCESS;
 }
 
 /*
 Automato 21
-Autor: Acosta
+Autor: Lucas
 
 <cmd_faca> ::= faca <comandos> ate <expressao>
 */
 
 int cmd_faca()
 {
-	int ret;
+   int ret;
 
-	CHECK_STRING(tk, "faca");
-	tk = get_token();
+   CHECK_STRING(tk, "faca");
+   tk = get_token();
 
-	CALL(comandos);
+   CALL(comandos);
 
-	CHECK_STRING(tk, "ate");
-	tk = get_token();
+   CHECK_STRING(tk, "ate");
+   tk = get_token();
 
-	CALL(expressao);
+   CALL(expressao);
 
    return SUCCESS;
 }
 
 /*
 Automato 22
-Autor: Acosta
+Autor: Lucas
 
 <cmd_pont_ident> ::= ^ IDENT <outros_ident> <dimensao> <- <expressao>
 */
 
 int cmd_pont_ident()
 {
-	int ret;
+   int ret;
 
-	CHECK_STRING(tk, "^");
-	tk = get_token();
+   CHECK_STRING(tk, "^");
+   tk = get_token();
 
-	CHECK_CLASS(tk, identifier);
-	tk = get_token();
+   CHECK_CLASS(tk, identifier);
+   tk = get_token();
 
-	CALL(outros_ident);
-	CALL(dimensao);
+   CALL(outros_ident);
+   CALL(dimensao);
 
-	CHECK_STRING(tk, "<-");
-	tk = get_token();
+   CHECK_STRING(tk, "<-");
+   tk = get_token();
 
-	CALL(expressao);
+   CALL(expressao);
 
    return SUCCESS;
 }
 
 /*
 Automato 23
-Autor: Acosta
+Autor: Lucas
 
 <cmd_ident> ::= IDENT <chamada_atribuicao>
 <chamada_atribuicao> ::= ( <expressao> <mais_expressao> )
-									| <outros_ident> <dimensao> <- <expressao>
+                           | <outros_ident> <dimensao> <- <expressao>
 */
 
 int cmd_ident()
 {
-	int ret;
+   int ret;
 
-	CHECK_CLASS(tk, identifier);
-	tk = get_token();
+   CHECK_CLASS(tk, identifier);
+   tk = get_token();
 
-	if( strcmp(tk->string, "(") == SUCCESS )
-	{
-		tk = get_token();
+   if( strcmp(tk->string, "(") == SUCCESS )
+   {
+      tk = get_token();
 
-		CALL(expressao);
-		CALL(mais_expressao);
+      CALL(expressao);
+      CALL(mais_expressao);
 
-		CHECK_STRING(tk, ")");
-		tk = get_token();
-	}
-	else
-	{
-		CALL(outros_ident);
-		CALL(dimensao);
+      CHECK_STRING(tk, ")");
+      tk = get_token();
+   }
+   else
+   {
+      CALL(outros_ident);
+      CALL(dimensao);
 
-		CHECK_STRING(tk, "<-");
-		tk = get_token();
+      CHECK_STRING(tk, "<-");
+      tk = get_token();
 
-		CALL(expressao);
-	}
+      CALL(expressao);
+   }
 
-	return SUCCESS;
+   return SUCCESS;
 }
 
 
 /*
 Automato 24
-Autor: Acosta
+Autor: Lucas
 
 <cmd_retorne> ::= retorne <expressao>
 */
 
 int cmd_retorne()
 {
-	int ret;
+   int ret;
 
-	CHECK_STRING(tk, "retorne");
-	tk = get_token();
+   CHECK_STRING(tk, "retorne");
+   tk = get_token();
 
-	CALL(expressao);
+   CALL(expressao);
 
-	return SUCCESS;
+   return SUCCESS;
+}
+
+/*
+Automato 33
+Autor: Nathan
+
+<parcela> ::= - ^ IDENT <outros_ident> <dimensao>
+            | - IDENT <chamada_partes>
+            | - NUM_INT
+            | - NUM_REAL
+            | - ( <expressao> )
+            | ^ IDENT <outros_ident> <dimensao>
+            | IDENT <chamada_partes>
+            | NUM_INT
+            | NUM_REAL
+            | ( <expressao> )
+            | & IDENT <outros_ident> <dimensao>
+            | CADEIA
+
+*/
+
+int parcela()
+{
+   int ret;
+
+   if( strcmp(tk->string, "&") == SUCCESS || tk->class == string )
+   {
+      if(strcmp(tk->string,"&") == SUCCESS)
+      {
+          tk = get_token();
+
+          CHECK_CLASS(tk,identifier);
+          tk = get_token();
+
+          CALL(outros_ident);
+          CALL(dimensao);
+      }
+      else
+      {
+          tk = get_token();
+      }
+   }
+   else
+   {
+      if(strcmp(tk->string,"-") == SUCCESS)
+         tk = get_token();
+
+      if(strcmp(tk->string,"^") == SUCCESS)
+      {
+         tk = get_token();
+
+         CHECK_CLASS(tk, identifier);
+         tk = get_token();
+
+         CALL(outros_ident);
+         CALL(dimensao);
+
+      }
+      else if(tk->class == identifier)
+      {
+         tk = get_token();
+         CALL(chamada_partes);
+      }
+      else if(tk->class == integer_number)
+      {
+         tk = get_token();
+      }
+      else if(tk->class == real_number)
+      {
+         tk = get_token();
+      }
+      else
+      {
+         CHECK_STRING(tk,"(");
+         tk = get_token();
+
+         CALL(expressao);
+
+         CHECK_STRING(tk,")");
+         tk = get_token();
+      }
+   }
+   return SUCCESS;
+ }
+
+
+/*
+Automato 34
+Autor: Nathan
+
+<outras_parcelas> ::= % <parcela> <outras_parcelas> | ε
+
+*/
+
+int outras_parcelas()
+{
+   while(strcmp(tk->string,"%") == SUCCESS)
+   {
+      tk = get_token();
+      CALL(parcela);
+   }
+   return SUCCESS;
 }
 
 
+
+
+
+/*
+Automato 35
+Autor: Nathan
+
+<chamada_partes>  ::= ( <expressao> <mais_expressao> )
+                    | <outros_ident> <dimensao>
+                    | ε
+
+*/
+
+int chamada_partes()
+{
+   if(strcmp(tk->string,"(") == SUCCESS)
+   {
+      tk = get_token();
+
+      CALL(expressao);
+      CALL(mais_expressao);
+
+      CHECK_STRING(tk,")");
+      tk = get_token();
+   }
+   else if(strcmp(tk->string,".") == SUCCESS || strcmp(tk->string,"[") == SUCCESS)
+   {
+      CALL(outros_ident);
+      CALL(dimensao);
+   }
+   return SUCCESS;
+}
+
+/*
+Automato 36
+Autor: Nathan
+
+<parcela_logica> ::= verdadeiro
+           | falso
+           | <exp_aritmetica> = <exp_aritmetica>
+           | <exp_aritmetica> <> <exp_aritmetica>
+           | <exp_aritmetica> >= <exp_aritmetica>
+           | <exp_aritmetica> <= <exp_aritmetica>
+           | <exp_aritmetica> > <exp_aritmetica>
+           | <exp_aritmetica> < <exp_aritmetica>
+           | <exp_aritmetica>
+
+*/
+
+int parcela_logica()
+{
+   if(strcmp(tk->string,"verdadeiro") == SUCCESS || strcmp(tk->string,"falso") == SUCCESS)
+   {
+      tk = get_token();
+   }
+   else if(search_first(tk, exp_aritmetica_firsts) == SUCCESS)
+   {
+      CALL(exp_aritmetica);
+
+      CHECK_STRINGS(tk,"=","<>",">=","<=",">","<");
+      tk = get_token();
+
+      CALL(exp_aritmetica);
+   }
+   else
+      return SYNTAXERROR;
+
+   return SUCCESS;
+}
+
+/*
+Automato 37
+Autor: Nathan
+
+<expressao>                      ::= <termo_logico> <outros_termos_logicos>
+
+*/
+int expressao()
+{
+   CALL(termo_logico);
+   CALL(outros_termos_logicos);
+
+   return SUCCESS;
+}
+
+
+/*
+Automato 38
+Autor: Nathan
+
+<termo_logico> ::= nao <parcela_logica> <outros_fatores_logicos>
+                 | <parcela_logica> <outros_fatores_logicos>
+*/
+
+int termo_logico()
+{
+   if(strcmp(tk->string,"nao") == SUCCESS)
+      tk = get_token();
+
+   CALL(parcela_logica);
+   CALL(outros_fatores_logicos);
+
+   return SUCCESS;
+}
+
+
+
+/*
+Automato 39
+Autor: Nathan
+
+<outros_termos_logicos>   ::= ou <termo_logico> <outros_termos_logicos>  | ε
+
+*/
+
+int outros_termos_logicos()
+{
+   while(strcmp(tk->string,"ou") == SUCCESS)
+   {
+      tk = get_token();
+      CALL(termo_logico);
+   }
+   return SUCCESS;
+}
+
+
+/*
+Automato 40
+Autor: Nathan
+
+<outros_fatores_logicos>   ::= e nao <parcela_logica> <outros_fatores_logicos>
+                             | e <parcela_logica> <outros_fatores_logicos>
+                             | ε
+*/
+
+int outros_fatores_logicos()
+{
+   while(strcmp(tk->string,"e") == SUCCESS)
+   {
+      tk = get_token();
+
+      if(strcmp(tk->string,"nao") == SUCCESS)
+         tk = get_token();
+
+      CALL(parcela_logica);
+   }
+   return SUCCESS;
+}
 
 
 
 /* DUMMY: TODO automata */
-int expressao()
-{
-	return SUCCESS;
-}
-
-int selecao()
-{
-	return SUCCESS;
-}
-
 int mais_expressao()
 {
-	return SUCCESS;
+   return SUCCESS;
+}
+int selecao()
+{
+   return SUCCESS;
+}
+int constantes()
+{
+   return SUCCESS;
 }
 int exp_aritmetica()
 {
    return SUCCESS;
 }
+int termo()
+{
+   return SUCCESS;
+}
+int outros_termos()
+{
+   return SUCCESS;
+}
+int fator()
+{
+   return SUCCESS;
+}
+int outros_fatores()
+{
+   return SUCCESS;
+}
+
