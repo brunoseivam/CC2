@@ -1204,9 +1204,7 @@ int constantes()
 			else
 				break;
 		}
-
 	}
-
 	return SUCCESS;
 }
 
@@ -1465,24 +1463,25 @@ Autor: Nathan
 int parcela_logica()
 {
    int ret;
+
    if(strcmp(tk->string,"verdadeiro") == SUCCESS || strcmp(tk->string,"falso") == SUCCESS)
    {
       tk = get_token();
    }
-   else if(search_first(tk, exp_aritmetica_firsts) == SUCCESS)
+   else
    {
       CALL(exp_aritmetica);
 
-      CHECK_STRINGS(tk,"=","<>",">=","<=",">","<");
-      tk = get_token();
-
-      CALL(exp_aritmetica);
+      if(strcmp(tk->string,"=") ==  SUCCESS || strcmp(tk->string,"<>") ==  SUCCESS || strcmp(tk->string,">=") ==  SUCCESS ||
+         strcmp(tk->string,"<=") ==  SUCCESS || strcmp(tk->string,">") ==  SUCCESS || strcmp(tk->string,"<") ==  SUCCESS)
+      {
+         tk = get_token();
+         CALL(exp_aritmetica);
+      }
    }
-   else
-      return SYNTAXERROR;
-
    return SUCCESS;
 }
+
 
 /*
 Automato 37
