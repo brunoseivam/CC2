@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 
    tk = get_token();
 
-   if(programa() != SUCCESS)
+   if((ret = programa()) != SUCCESS)
       handle_error(ret);
    else
 		printf("Fim da compilacao\n"); /* Imprimir mensagem de Fim da compilacao aqui? */
