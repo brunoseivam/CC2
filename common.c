@@ -10,7 +10,7 @@ char*    keyword_list[] = { "algoritmo", "ate", "caso", "constante", "declare", 
                            "se", "seja", "senao", "tipo", "var", "verdadeiro" };
 int      keyword_list_size = 37;
 
-
+/* Abre os arquivos in_file e out_file, inicializa o valor da linha atual com 1 */
 int   open_files(char* in, char* out)
 {
    if( (in_file  = fopen(in,  "r")) == NULL ||
@@ -21,19 +21,21 @@ int   open_files(char* in, char* out)
    return SUCCESS;
 }
 
+/* Fecha os arquivos abertos */
 void   close_files()
 {
    fclose(in_file);
    fclose(out_file);
 }
 
+/* Busca binária em lista de cadeias OU lista de classes, de acordo com TYPE */
 int   search(void* kw, void* vec, int vec_size, int type)
 {
    int min, max, i, res;
 
    min = 0;
    max = vec_size-1;
-   i = (max + min) / 2;
+   i = (max + min) / 2;          /* Começa no meio do vetor */
 
    while(min<=max)
    {
@@ -53,15 +55,19 @@ int   search(void* kw, void* vec, int vec_size, int type)
    return ERROR;         /* NAO ENCONTROU  */
 }
 
+/* Procura dentro de uma estrutura de primeiros */
 int search_first(token* tk, firsts p)
 {
+   /* Procura primeiro na lista de cadeias */
    if(!(tk->string == NULL) &&
         search((void*) tk->string, (void*) p.string_list, p.string_list_size, STRING) == SUCCESS)
       return SUCCESS;
 
+   /* depois na lista de classes */
    if(search((void* )tk->class, (void*) p.tk_class_list, p.tk_class_list_size, TK_CLASS) == SUCCESS)
       return SUCCESS;
 
+   /* Por fim, em outras estruturas de primeiros */
    int i;
    for(i = 0; i < p.other_firsts_list_size; ++i)
       if(search_first(tk, *p.other_firsts_list[i]) == SUCCESS)

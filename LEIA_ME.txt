@@ -1,4 +1,4 @@
-Trabalho 1 de Construção de Compiladores 2
+Trabalho 2 de Construção de Compiladores 2
 
 Linguagem utilizada: C (ISO C99)
 
@@ -12,7 +12,7 @@ Integrantes:
 
 Para compilar
 
-gcc -Wall -pedantic -std=c99 syntax.c lex.c main.c common.c -o main.out
+gcc -Wall -std=c99 syntax.c lex.c main.c common.c -o main.out
 
 Para rodar
 

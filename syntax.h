@@ -4,9 +4,40 @@
 #include "common.h"
 #include "lex.h"
 
+/* As macros abaixo servem para trechos comuns do código, que se repetiriam muitas vezes.
+   Além disso, elas provém certa elegância no código, pois, por exemplo, é mais significativo ler
+
+   CALL(automata);
+
+   do que
+
+   if( ret = automata() != SUCCESS) return ret;
+*/
+
+
+/* Esta macro chama o autômato passado como argumento. Caso o autômato encontre erro, interrompe-se o
+   fluxo de execução retornando-se o erro encontrado
+
+   Obs.: int ret; deve estar declarada na função que chama esta macro
+   */
+
 #define  CALL(automata)          if( (ret = automata() ) != SUCCESS ) return ret
+
+/* Esta macro checa se o token passado contém a string esperada. Caso negativo, retorna com SYNTAXERROR */
 #define  CHECK_STRING(tk, str)   if( strcmp(tk->string, str) != SUCCESS ) return SYNTAXERROR
+
+/* Esta macro checa se o token passado contém a classe esperada. Caso negativo, retorna com SYNTAXERROR */
 #define  CHECK_CLASS(tk, cls)    if( tk->class != cls ) return SYNTAXERROR
+
+/* Esta macro não foi implementada como função por uma questão de desempenho. Como um compilador usa e abusa
+   de pilhas de funções, procuramos como regra geral evitar ao máximo chamadas de funções.
+
+   Esta macro checa se o token passado contém uma das strings passadas. Se não contiver, retorna SYNTAXERROR
+   Por exemplo, CHECK_STRINGS(tk, "a", "b") vai retornar erro caso tk->string não seja "a" NEM "b"
+
+   O loop do{}while(0) serve apenas para se poder agrupar várias instruções em uma macro.
+*/
+
 
 #define  CHECK_STRINGS(tk, ...)  do{                                                      \
                                     char* vec[] = {__VA_ARGS__};                          \
@@ -20,6 +51,7 @@
                                     if(!count) return SYNTAXERROR;                        \
                                  }while(0)
 
+/* Faz o mesmo que acima, mas com tk->class */
 #define  CHECK_CLASSES(tk, ...)  do{                                                      \
                                     token_class vec[] = {__VA_ARGS__};                    \
                                     int count = sizeof(vec)/sizeof(token_class);          \
@@ -33,55 +65,57 @@
                                  }while(0)
 
 
+/* Protótipos */
+
 /* Bruno */
-const firsts programa_firsts;          /* Não utilizado */
+const firsts programa_firsts;
 const firsts declaracao_local_firsts;
-const firsts variavel_firsts;          /* Codificado no autômato */
+const firsts variavel_firsts;
 const firsts identificador_firsts;
-const firsts outros_ident_firsts;      /* Codificado no autômato */
-const firsts dimensao_firsts;          /* Codificado no autômato */
-const firsts tipo_firsts;              /* Não utilizado */
-const firsts mais_ident_firsts;        /* Não utilizado */
+const firsts outros_ident_firsts;
+const firsts dimensao_firsts;
+const firsts tipo_firsts;
+const firsts mais_ident_firsts;
 
 /* Talita */
-const firsts tipo_basico_firsts;       /* Não utilizado */
-const firsts tipo_estendido_firsts;    /* Não utilizado */
+const firsts tipo_basico_firsts;
+const firsts tipo_estendido_firsts;
 const firsts declaracao_global_firsts;
 const firsts parametro_firsts;
-const firsts declaracoes_locais_firsts;/* Não utilizado */
+const firsts declaracoes_locais_firsts;
 const firsts comandos_firsts;
-const firsts cmd_leia_firsts;          /* Codificado no autômato */
-const firsts cmd_escreva_firsts;       /* Codificado no autômato */
+const firsts cmd_leia_firsts;
+const firsts cmd_escreva_firsts;
 
 /* Lucas */
-const firsts cmd_se_firsts;            /* Codificado no autômato */
-const firsts cmd_caso_firsts;          /* Codificado no autômato */
-const firsts cmd_para_firsts;          /* Codificado no autômato */
-const firsts cmd_enquanto_firsts;      /* Codificado no autômato */
-const firsts cmd_faca_firsts;          /* Codificado no autômato */
-const firsts cmd_pont_ident_firsts;    /* Codificado no autômato */
-const firsts cmd_ident_firsts;         /* Codificado no autômato */
-const firsts cmd_retorne_firsts;       /* Codificado no autômato */
+const firsts cmd_se_firsts;
+const firsts cmd_caso_firsts;
+const firsts cmd_para_firsts;
+const firsts cmd_enquanto_firsts;
+const firsts cmd_faca_firsts;
+const firsts cmd_pont_ident_firsts;
+const firsts cmd_ident_firsts;
+const firsts cmd_retorne_firsts;
 
 /* Marcos */
-const firsts mais_expressao_firsts;    /* Não utilizado */
-const firsts selecao_firsts;           /* Não utilizado */
-const firsts constantes_firsts;        /* Não utilizado */
+const firsts mais_expressao_firsts;
+const firsts selecao_firsts;
+const firsts constantes_firsts;
 const firsts exp_aritmetica_firsts;
-const firsts termo_firsts;             /* Não utilizado */
-const firsts outros_termos_firsts;     /* Não utilizado */
-const firsts fator_firsts;             /* Não utilizado */
-const firsts outros_fatores_firsts;    /* Não utilizado */
+const firsts termo_firsts;
+const firsts outros_termos_firsts;
+const firsts fator_firsts;
+const firsts outros_fatores_firsts;
 
 /* Nathan */
-const firsts parcela_firsts;           /* Não utilizado */
-const firsts outras_parcelas_firsts;   /* Não utilizado */
-const firsts chamada_partes_firsts;    /* Não utilizado */
-const firsts parcela_logica_firsts;    /* Não utilizado */
-const firsts expressao_firsts;         /* Não utilizado */
-const firsts termo_logico_firsts;      /* Não utilizado */
-const firsts outros_termos_logicos_firsts;   /* Não utilizado */
-const firsts outros_fatores_logicos_firsts;  /* Não utilizado */
+const firsts parcela_firsts;
+const firsts outras_parcelas_firsts;
+const firsts chamada_partes_firsts;
+const firsts parcela_logica_firsts;
+const firsts expressao_firsts;
+const firsts termo_logico_firsts;
+const firsts outros_termos_logicos_firsts;
+const firsts outros_fatores_logicos_firsts;
 
 /* Bruno */
 int programa();

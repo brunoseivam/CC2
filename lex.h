@@ -3,6 +3,7 @@
 
 #include "common.h"
 
+/* Macros auxiliares para testar caracteres. Mais semântico do que embuti-las direto no código */
 #define  ISLETTER(c)       ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
 #define  ISALGARISM(c)     (c >= '0' && c <= '9')
 #define  ISUNDERSCORE(c)   (c == '_')

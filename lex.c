@@ -1,6 +1,6 @@
 #include "lex.h"
 
-
+/* Função principal do analisador léxico. Retorna um "objeto" token, com a cadeia reconhecida e a classe do token. */
 token* get_token()
 {
    token* tk = (token *) malloc(sizeof(token));
@@ -18,16 +18,16 @@ token* get_token()
       while(ISWHITESPACE(c))
       {
          if(ISLINEFEED(c))
-            ++line_number;
+            ++line_number;       /* A cada \n consumido, incrementa o numero da linha atual */
          c = getc(in_file);
       }
-      if(ISOPENCURLY(c))
+      if(ISOPENCURLY(c))         /* Inicio de comentário '{' */
       {
-         ret = aut_comment(tk);
+         ret = aut_comment(tk);  /* Tenta consumir o comentário todo */
          if(ret == RECOGNIZED)
             comment_recognized = 1;
          else if(ret == COMMENTERROR)
-            return tk;
+            return tk;           /* Comentário não fechado, retorna o token de erro */
       }
    }while(comment_recognized);
 
@@ -42,7 +42,7 @@ token* get_token()
       ret = aut_string(tk);
       /* Caractere nao reconhecido (aspas nao fechadas) */
       if(ret == NOTRECOGNIZED)
-         aut_notrecognized(tk);
+         aut_notrecognized(tk);  /* Preenche o token com o símbolo não reconhecido '"' */
    }
    /* Numero inteiro ou real */
    else if(ISALGARISM(c))
@@ -65,7 +65,7 @@ token* get_token()
    else                                /* Caractere não reconhecido */
    {
       fseek(in_file, -1, SEEK_CUR);    /* Devolve-o ao buffer       */
-      aut_notrecognized(tk);
+      aut_notrecognized(tk);           /* Preenche o token com o símbolo não reconhecido */
    }
    return tk;
 }

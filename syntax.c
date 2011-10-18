@@ -3,8 +3,7 @@
 
 #include "syntax.h"
 
-/* Firsts não utilizados estão comentados
-   Caso a estrutura first contenha apenas uma string OU
+/* Caso a estrutura first contenha apenas uma string OU
      uma token_class OU um ponteiro ficou decidido que
      seria codificado diretamente no autômato */
 
@@ -13,18 +12,14 @@
 Fonte: http://stackoverflow.com/questions/3875523/lookup-table-in-c */
 
 
-/*
-const firsts programa_firsts =
-{
-   .string_list      = (const char * const []){"algoritmo"},
-   .string_list_size = 1,
+/* Estrutura firsts:
+      Três campos principais:
+         string_list:      Lista de primeiros que sejam palavra-chave ou simbolo. Devem ser identificados atrabés de sua cadeia
+         tk_class_list:    Lista de primeiros que sejam identificados através de sua classe (NUM_INT, IDENT...)
+         other_firsts_list:Lista de outros primeiros a se consultar. Por exemplo primeiros(parametro) = { var, primeiros(identificador) }
 
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
+*/
 
-   .other_firsts_list = (const firsts * const []){ &declaracao_global_firsts, &declaracao_local_firsts },
-   .other_firsts_list_size = 2
-};*/
 
 
 /* Autor: Bruno
@@ -44,20 +39,6 @@ const firsts declaracao_local_firsts =
 };
 
 
-/* Autor: Bruno
-primeiros(variavel) = primeiros(identificador);
-
-const firsts variavel_firsts =
-{
-   .string_list = NULL,
-   .string_list_size = 0,
-
-   .tk_class_list = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = (const firsts * const []) { &identificador_firsts },
-   .other_firsts_list_size = 1
-};*/
 
 /* Autor: Bruno
 primeiros(identificador) = { ^, IDENT}
@@ -89,7 +70,7 @@ const firsts parametro_firsts =
 };
 
 /* Autor: Talita
-primeiros(comandos) = { leia, escreva, se, caso, para, enquanto, faca, ^, IDENT, retorne, ε }
+primeiros(comandos) = { leia, escreva, se, caso, para, enquanto, faca, ^, IDENT, retorne, epsilon }
 */
 const firsts comandos_firsts =
 {
@@ -111,21 +92,6 @@ const firsts declaracao_global_firsts =
 {
    .string_list = (const char * const []){"funcao", "procedimento"},
    .string_list_size = 2,
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = NULL,
-   .other_firsts_list_size = 0
-};
-
-/* Autor: Marcos
-primeiros(mais_expressao) = { ',' }
-*/
-const firsts mais_expressao_firsts =
-{
-   .string_list = (const char * const []){","},
-   .string_list_size = 1,
 
    .tk_class_list    = NULL,
    .tk_class_list_size = 0,
@@ -164,217 +130,17 @@ const firsts constantes_firsts =
    .other_firsts_list_size = 0
 };
 
-/* Autor: Marcos
-primeiros(exp_aritmetica) = { -, ^, IDENT, &, NUM_INT, NUM_REAL,(, CADEIA }
-*/
-const firsts exp_aritmetica_firsts =
-{
-   .string_list = NULL,
-   .string_list_size = 0,
 
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
+/* Autômatos:
 
-   .other_firsts_list = (const firsts * const []){ &parcela_firsts },
-   .other_firsts_list_size = 1
-};
+   Autômatos com recursão foram implementados com loop (while)
 
-/* Autor: Marcos
-primeiros(termo) = { -, ^, IDENT, &, NUM_INT, NUM_REAL,(, CADEIA }
-*/
-const firsts termo_firsts =
-{
-   .string_list = NULL,
-   .string_list_size = 0,
+   Podem retornar dois valores: SUCCESS ou SYNTAXERROR. A rotina handle_error, na main(), analisa os casos de erro para separar
+     os erros léxicos dos sintáticos, através da classe do token.
 
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = (const firsts * const []){ &parcela_firsts },
-   .other_firsts_list_size = 1
-};
-
-/* Autor: Marcos
-primeiros(outros_termos) = { +,- }
-*/
-const firsts outros_termos_firsts =
-{
-   .string_list = (const char * const []){"+","-"},
-   .string_list_size = 2,
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = NULL,
-   .other_firsts_list_size = 0
-};
-
-/* Autor: Marcos
-primeiros(fator) = { -, ^, IDENT, &, NUM_INT, NUM_REAL,(, CADEIA }
-*/
-const firsts fator_firsts =
-{
-   .string_list = NULL,
-   .string_list_size = 0,
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = (const firsts * const []){ &parcela_firsts },
-   .other_firsts_list_size = 1
-};
-
-/* Autor: Marcos
-primeiros(outros_fatores) = { *,/ }
-*/
-const firsts outros_fatores_firsts =
-{
-   .string_list = (const char * const []){"*","/"},
-   .string_list_size = 2,
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = NULL,
-   .other_firsts_list_size = 0
-};
-
-
-
-/* Autor: Nathan
-primeiros(parcela) = {-,^,IDENT,NUM_INT,NUM_REAL,(,&,CADEIA};
-
-const firsts parcela_firsts =
-{
-   .string_list      = (const char * const []){"&","(","-","^"},
-   .string_list_size = 4,
-
-   .tk_class_list    = (const token_class []){identifier,string,real_number,integer_number},
-   .tk_class_list_size = 4,
-
-   .other_firsts_list = NULL,
-   .other_firsts_list_size = 0
-};
+   As macros utilizadas estão explicadas em syntax.h, onde estão definidas.
 */
 
-/* Autor: Nathan
-primeiros(outras_parcelas) = {%};
-
-
-const firsts outras_parcelas_firsts =
-{
-   .string_list      = (const char * const []){"%"},
-   .string_list_size = 1,
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = NULL,
-   .other_firsts_list_size = 0
-};
-*/
-
-/* Autor: Nathan
-primeiros(chamada_partes) = {(,.,[};
-
-
-const firsts chamada_partes_firsts =
-{
-   .string_list      = (const char * const []){"(",".","["},
-   .string_list_size = 3,
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = NULL,
-   .other_firsts_list_size = 0
-};
-*/
-
-/* Autor: Nathan
-primeiros(parcela_logica) = {verdadeiro,falso,primeiros(exp_aritmetica));
-
-
-const firsts parcela_logica_firsts =
-{
-   .string_list      = (const char * const []){"falso","verdadeiro"},
-   .string_list_size = 2,
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = (const firsts * const []){ &exp_aritmetica_firsts},
-   .other_firsts_list_size = 1
-};
-*/
-
-/* Autor: Nathan
-primeiros(expressao) = primeiros(termo_logico);
-
-
-const firsts expressao_firsts =
-{
-   .string_list      = NULL,
-   .string_list_size = 0,
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = (const firsts * const []){ &termo_logico_firsts},
-   .other_firsts_list_size = 1
-};
-*/
-
-/* Autor: Nathan
-primeiros(termo_logico) = {nao,primeiros(parcela_logica)};
-
-
-const firsts termo_logico_firsts =
-{
-   .string_list      = (const char * const []){"nao"},
-   .string_list_size = 1,
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = (const firsts * const []){ &parcela_logica_firsts},
-   .other_firsts_list_size = 1
-};
-*/
-
-/* Autor: Nathan
-primeiros(outros_termos_logicos) = {ou};
-
-
-const firsts outros_termos_logicos_firsts =
-{
-   .string_list      = (const char * const []){"ou"},
-   .string_list_size = 1,
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = NULL,
-   .other_firsts_list_size = 0
-};
-*/
-
-/* Autor: Nathan
-primeiros(outros_fatores_logicos) = {e};
-
-
-const firsts outros_fatores_logicos_firsts =
-{
-   .string_list      = (const char * const []){"e"},
-   .string_list_size = 1,
-
-   .tk_class_list    = NULL,
-   .tk_class_list_size = 0,
-
-   .other_firsts_list = NULL,
-   .other_firsts_list_size = 0
-};
-*/
 
 
 /*
@@ -384,7 +150,7 @@ Autor: Bruno
 <programa>           ::= <declaracoes> algoritmo <declaracoes_locais> <comandos> fim_algoritmo
 <declaracoes>        ::= <declaracao_local> <declaracoes>
                        | <declaracao_global> <declaracoes>
-                       | ε
+                       | epsilon
 */
 
 int programa()
@@ -523,7 +289,7 @@ int identificador()
 Automato 5
 Autor: Bruno
 
-<outros_ident>                 ::= . IDENT <outros_ident> | ε
+<outros_ident>                 ::= . IDENT <outros_ident> | epsilon
 */
 int outros_ident()
 {
@@ -541,7 +307,7 @@ int outros_ident()
 Automato 6
 Autor: Bruno
 
-<dimensao>                     ::= [ <exp_aritmetica> ] <dimensao>| ε
+<dimensao>                     ::= [ <exp_aritmetica> ] <dimensao>| epsilon
 */
 int dimensao()
 {
@@ -563,7 +329,7 @@ Autor: Bruno
 <tipo>                              ::= registro <variavel> <mais_variaveis> fim_registro
                                      | <tipo_estendido>
 
-<mais_variaveis>                    ::= <variavel> <mais_variaveis> | ε
+<mais_variaveis>                    ::= <variavel> <mais_variaveis> | epsilon
 */
 int tipo()
 {
@@ -591,7 +357,7 @@ int tipo()
 Automato 8
 Autor: Bruno
 
-<mais_ident>                   ::= , <identificador> <mais_ident> | ε
+<mais_ident>                   ::= , <identificador> <mais_ident> | epsilon
 */
 int mais_ident()
 {
@@ -652,7 +418,7 @@ Autor: Talita
                        | funcao IDENT ( <parametros_opcional> ) : <tipo_estendido> <declaracoes_locais> <comandos> fim_funcao
 
 <parametros_opcional> ::=  <parametro>
-                     | ε
+                     | epsilon
 */
 
 int declaracao_global()
@@ -718,9 +484,9 @@ Autor: Talita
 
 <parametro> ::= <var_opcional> <identificador> <mais_ident> : <tipo_estendido> <mais_parametros>
 
-<var_opcional> ::= var | ε
+<var_opcional> ::= var | epsilon
 
-<mais_parametros> ::= , <parametro> | ε
+<mais_parametros> ::= , <parametro> | epsilon
 
 */
 
@@ -754,7 +520,7 @@ int parametro()
 Automato 13
 Autor: Talita
 
-<declaracoes_locais> ::= <declaracao_local> <declaracoes_locais> | ε
+<declaracoes_locais> ::= <declaracao_local> <declaracoes_locais> | epsilon
 
 */
 
@@ -774,7 +540,7 @@ Autor: Talita
 
 <comandos> ::=  <cmd_leia> <comandos> | <cmd_escreva> <comandos> | <cmd_se> <comandos> | <cmd_caso> <comandos>
               | <cmd_para> <comandos> | <cmd_enquanto> <comandos> | <cmd_faca> <comandos> | <cmd_pont_ident> <comandos>
-              | <cmd_ident> <comandos> | retorne <expressao> <comandos> | ε
+              | <cmd_ident> <comandos> | retorne <expressao> <comandos> | epsilon
 */
 
 int comandos()
@@ -919,7 +685,7 @@ Automato 18
 Autor: Lucas
 
 <cmd_caso> ::= caso <exp_aritmetica> seja <selecao> <senao_opcional> fim_caso
-<senao_opcional> ::= senao <comandos> | ε
+<senao_opcional> ::= senao <comandos> | epsilon
 */
 
 int cmd_caso()
@@ -1133,7 +899,7 @@ Automato 25
 Autor: Marcos
 
 <mais_expressao>                 ::= , <expressao> <mais_expressao>
-							       | ε
+							       | epsilon
 */
 
 int mais_expressao()
@@ -1161,7 +927,7 @@ int selecao()
 {
 	int ret;
 
-	while( search_first(tk,selecao_firsts) == SUCCESS)
+	do
    {
       CALL(constantes);
 
@@ -1169,7 +935,7 @@ int selecao()
 	   tk = get_token();
 
 	   CALL(comandos);
-   }
+   }while( search_first(tk,selecao_firsts) == SUCCESS);
 
 	return SUCCESS;
 }
@@ -1265,7 +1031,7 @@ Autor: Marcos
 
 <outros_termos>                  ::= + <termo> <outros_termos>
 								   | - <termo> <outros_termos>
-								   | ε
+								   | epsilon
 */
 
 int outros_termos()
@@ -1407,7 +1173,7 @@ int parcela()
 Automato 34
 Autor: Nathan
 
-<outras_parcelas> ::= % <parcela> <outras_parcelas> | ε
+<outras_parcelas> ::= % <parcela> <outras_parcelas> | epsilon
 
 */
 
@@ -1432,7 +1198,7 @@ Autor: Nathan
 
 <chamada_partes>  ::= ( <expressao> <mais_expressao> )
                     | <outros_ident> <dimensao>
-                    | ε
+                    | epsilon
 
 */
 
@@ -1539,7 +1305,7 @@ int termo_logico()
 Automato 39
 Autor: Nathan
 
-<outros_termos_logicos>   ::= ou <termo_logico> <outros_termos_logicos>  | ε
+<outros_termos_logicos>   ::= ou <termo_logico> <outros_termos_logicos>  | epsilon
 
 */
 
@@ -1561,7 +1327,7 @@ Autor: Nathan
 
 <outros_fatores_logicos>   ::= e nao <parcela_logica> <outros_fatores_logicos>
                              | e <parcela_logica> <outros_fatores_logicos>
-                             | ε
+                             | epsilon
 */
 
 int outros_fatores_logicos()
