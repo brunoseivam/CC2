@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 #include "syntax.h"
-
+{
 /* Caso a estrutura first contenha apenas uma string OU
      uma token_class OU um ponteiro ficou decidido que
      seria codificado diretamente no autômato */
@@ -141,7 +141,7 @@ const firsts constantes_firsts =
    As macros utilizadas estão explicadas em syntax.h, onde estão definidas.
 */
 
-
+}
 
 /*
 Automato 1
@@ -264,23 +264,23 @@ int variavel()
    int ret;
 
 	while (1)
-	{	
+	{
 		CHECK_CLASS(tk, identifier);
 		tk = get_token();
-		
+
 		CALL(dimensao);
-		
+
 		if( strcmp(tk->string, ",") != SUCCESS)
 			break;
-		
-		tk = get_token();	
+
+		tk = get_token();
 	}
-   
+
 	CHECK_STRING(tk, ":");
    tk = get_token();
 
    CALL(tipo);
-   
+
 	return SUCCESS;
 }
 
@@ -1219,10 +1219,10 @@ int expressao()
 
 		CALL(parcela_logica);
 		CALL(outros_fatores_logicos);
-		
+
 		if (strcmp(tk->string,"ou") != SUCCESS)
-			break;		
-		
+			break;
+
 		tk = get_token();
 	}
 
