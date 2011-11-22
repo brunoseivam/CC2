@@ -45,9 +45,6 @@ int main(int argc, char** argv)
       return 1;
    }
 
-   /* Pega o primeiro token */
-   tk = get_token();
-
    if((ret = programa()) != SUCCESS)
       handle_error(ret);               /* Trata o erro, caso exista */
 

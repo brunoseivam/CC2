@@ -151,11 +151,15 @@ Autor: Bruno
 <declaracoes>        ::= <declaracao_local> <declaracoes>
                        | <declaracao_global> <declaracoes>
                        | epsilon
+<declaracoes_locais> ::= <declaracao_local> <declaracoes_locais> | epsilon
 */
 
 int programa()
 {
    int ret;
+
+	/* Pega o primeiro token */
+	tk = get_token();
 
    while(1)
    {
@@ -174,7 +178,9 @@ int programa()
    CHECK_STRING(tk, "algoritmo");
    tk = get_token();
 
-   CALL(declaracoes_locais);
+   while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
+      CALL(declaracao_local);
+
    CALL(comandos);
 
    CHECK_STRING(tk, "fim_algoritmo");
@@ -194,6 +200,7 @@ Autor: Bruno
                              | constante IDENT : <tipo_basico>  = verdadeiro
                              | constante IDENT : <tipo_basico>  = falso
                              | tipo IDENT : <tipo>
+<tipo_basico> ::= literal | inteiro | real | logico
 */
 int declaracao_local()
 {
@@ -214,7 +221,8 @@ int declaracao_local()
       CHECK_STRING(tk, ":");
       tk = get_token();
 
-      CALL(tipo_basico);
+      CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
+   	tk = get_token();
 
       CHECK_STRING(tk, "=");
       tk = get_token();
@@ -246,20 +254,34 @@ int declaracao_local()
 Automato 3
 Autor: Bruno
 
-<variavel>                   ::= <identificador> <mais_ident> : <tipo>
+<variavel> ::= IDENT <dimensao> <mais_var> : <tipo>
+<mais_var> ::= , <variavel> <mais_var>
+					| epsilon
 */
+
 int variavel()
 {
    int ret;
 
-   CALL(identificador);
-   CALL(mais_ident);
-
-   CHECK_STRING(tk, ":");
+	while (1)
+	{	
+		CHECK_CLASS(tk, identifier);
+		tk = get_token();
+		
+		CALL(dimensao);
+		
+		if( strcmp(tk->string, ",") != SUCCESS)
+			break;
+		
+		tk = get_token();	
+	}
+   
+	CHECK_STRING(tk, ":");
    tk = get_token();
 
    CALL(tipo);
-   return SUCCESS;
+   
+	return SUCCESS;
 }
 
 /*
@@ -355,18 +377,28 @@ int tipo()
 
 /*
 Automato 8
-Autor: Bruno
+Autor: Talita
 
-<mais_ident>                   ::= , <identificador> <mais_ident> | epsilon
+tipo_estendido ::=  ^ IDENT
+                  | ^ tipo_basico
+                  | IDENT
+                  | tipo_basico
+<tipo_basico> ::= literal | inteiro | real | logico
 */
-int mais_ident()
+
+int tipo_estendido()
 {
-   int ret;
-   while( strcmp(tk->string, ",") == SUCCESS)
-   {
+   if ( strcmp(tk->string, "^") == SUCCESS )
       tk = get_token();
-      CALL(identificador);
-   }
+
+   if ( tk->class == identifier )
+      tk = get_token();
+   else
+	{
+      CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
+   	tk = get_token();
+	}
+
    return SUCCESS;
 }
 
@@ -374,51 +406,12 @@ int mais_ident()
 Automato 9
 Autor: Talita
 
-<tipo_basico> ::= literal | inteiro | real | logico
-*/
-
-int tipo_basico()
-{
-   CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
-   tk = get_token();
-
-   return SUCCESS;
-}
-
-/*
-Automato 10
-Autor: Talita
-
-tipo_estentido ::=  ^ IDENT
-                  | ^ tipo_basico
-                  | IDENT
-                  | tipo_basico
-*/
-
-int tipo_estendido()
-{
-   int ret;
-
-   if ( strcmp(tk->string, "^") == SUCCESS )
-      tk = get_token();
-
-   if ( tk->class == identifier )
-      tk = get_token();
-   else
-      CALL(tipo_basico);
-
-   return SUCCESS;
-}
-
-/*
-Automato 11
-Autor: Talita
-
 <declaracao_global> ::=  procedimento IDENT ( <parametros_opcional> ) <declaracoes_locais> <comandos> fim_procedimento
                        | funcao IDENT ( <parametros_opcional> ) : <tipo_estendido> <declaracoes_locais> <comandos> fim_funcao
 
 <parametros_opcional> ::=  <parametro>
                      | epsilon
+<declaracoes_locais> ::= <declaracao_local> <declaracoes_locais> | epsilon
 */
 
 int declaracao_global()
@@ -441,7 +434,9 @@ int declaracao_global()
       CHECK_STRING(tk, ")");
       tk = get_token();
 
-      CALL(declaracoes_locais);
+      while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
+      	CALL(declaracao_local);
+
       CALL(comandos);
 
       CHECK_STRING(tk, "fim_procedimento");
@@ -468,7 +463,10 @@ int declaracao_global()
       tk = get_token();
 
       CALL(tipo_estendido);
-      CALL(declaracoes_locais);
+
+      while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
+	      CALL(declaracao_local);
+
       CALL(comandos);
 
       CHECK_STRING(tk, "fim_funcao");
@@ -479,7 +477,7 @@ int declaracao_global()
 }
 
 /*
-Automato 12
+Automato 10
 Autor: Talita
 
 <parametro> ::= <var_opcional> <identificador> <mais_ident> : <tipo_estendido> <mais_parametros>
@@ -487,6 +485,7 @@ Autor: Talita
 <var_opcional> ::= var | epsilon
 
 <mais_parametros> ::= , <parametro> | epsilon
+<mais_ident>                   ::= , <identificador> <mais_ident> | epsilon
 
 */
 
@@ -500,7 +499,12 @@ int parametro()
          tk = get_token();
 
       CALL(identificador);
-      CALL(mais_ident);
+
+      while( strcmp(tk->string, ",") == SUCCESS)
+   	{
+      	tk = get_token();
+      	CALL(identificador);
+   	}
 
       CHECK_STRING(tk, ":");
       tk = get_token();
@@ -517,25 +521,7 @@ int parametro()
 }
 
 /*
-Automato 13
-Autor: Talita
-
-<declaracoes_locais> ::= <declaracao_local> <declaracoes_locais> | epsilon
-
-*/
-
-int declaracoes_locais()
-{
-   int ret;
-
-   while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
-      CALL(declaracao_local);
-
-   return SUCCESS;
-}
-
-/*
-Automato 14
+Automato 11
 Autor: Talita
 
 <comandos> ::=  <cmd_leia> <comandos> | <cmd_escreva> <comandos> | <cmd_se> <comandos> | <cmd_caso> <comandos>
@@ -595,10 +581,11 @@ int comandos()
 }
 
 /*
-Automato 15
+Automato 12
 Autor: Talita
 
 <cmd_leia> ::= leia ( <identificador> <mais_ident> )
+<mais_ident>                   ::= , <identificador> <mais_ident> | epsilon
 */
 
 int cmd_leia()
@@ -612,7 +599,12 @@ int cmd_leia()
    tk = get_token();
 
    CALL(identificador);
-   CALL(mais_ident);
+
+   while( strcmp(tk->string, ",") == SUCCESS)
+   {
+      tk = get_token();
+      CALL(identificador);
+   }
 
    CHECK_STRING(tk, ")");
    tk = get_token();
@@ -621,10 +613,13 @@ int cmd_leia()
 }
 
 /*
-Automato 16
+Automato 13
 Autor: Talita
 
 <cmd_escreva> ::= escreva ( <expressao> <mais_expressao> )
+<mais_expressao>                 ::= , <expressao> <mais_expressao>
+							       | epsilon
+
 */
 
 int cmd_escreva()
@@ -638,7 +633,12 @@ int cmd_escreva()
    tk = get_token();
 
    CALL(expressao);
-   CALL(mais_expressao);
+
+  	while(strcmp(tk->string, ",") == SUCCESS)
+   {
+      tk = get_token();
+      CALL(expressao);
+   }
 
    CHECK_STRING(tk, ")");
    tk = get_token();
@@ -647,7 +647,7 @@ int cmd_escreva()
 }
 
 /*
-Automato 17
+Automato 14
 Autor: Lucas
 
 <cmd_se> ::= se <expressao> entao <comandos> senao <comandos> fim_se
@@ -681,7 +681,7 @@ int cmd_se()
 }
 
 /*
-Automato 18
+Automato 15
 Autor: Lucas
 
 <cmd_caso> ::= caso <exp_aritmetica> seja <selecao> <senao_opcional> fim_caso
@@ -716,7 +716,7 @@ int cmd_caso()
 
 
 /*
-Automato 19
+Automato 16
 Autor: Lucas
 
 <cmd_para>  ::= para IDENT <- <exp_aritmetica> ate <exp_aritmetica> faca <comandos> fim_para
@@ -755,7 +755,7 @@ int cmd_para()
 
 
 /*
-Automato 20
+Automato 17
 Autor: Lucas
 
 <cmd_enquanto> ::= enquanto <expressao> faca <comandos> fim_enquanto
@@ -783,7 +783,7 @@ int cmd_enquanto()
 }
 
 /*
-Automato 21
+Automato 18
 Autor: Lucas
 
 <cmd_faca> ::= faca <comandos> ate <expressao>
@@ -807,7 +807,7 @@ int cmd_faca()
 }
 
 /*
-Automato 22
+Automato 19
 Autor: Lucas
 
 <cmd_pont_ident> ::= ^ IDENT <outros_ident> <dimensao> <- <expressao>
@@ -835,12 +835,14 @@ int cmd_pont_ident()
 }
 
 /*
-Automato 23
+Automato 20
 Autor: Lucas
 
 <cmd_ident> ::= IDENT <chamada_atribuicao>
 <chamada_atribuicao> ::= ( <expressao> <mais_expressao> )
                            | <outros_ident> <dimensao> <- <expressao>
+<mais_expressao>                 ::= , <expressao> <mais_expressao>
+							       | epsilon
 */
 
 int cmd_ident()
@@ -855,7 +857,12 @@ int cmd_ident()
       tk = get_token();
 
       CALL(expressao);
-      CALL(mais_expressao);
+
+      while(strcmp(tk->string, ",") == SUCCESS)
+   	{
+      	tk = get_token();
+      	CALL(expressao);
+   	}
 
       CHECK_STRING(tk, ")");
       tk = get_token();
@@ -876,7 +883,7 @@ int cmd_ident()
 
 
 /*
-Automato 24
+Automato 21
 Autor: Lucas
 
 <cmd_retorne> ::= retorne <expressao>
@@ -895,28 +902,7 @@ int cmd_retorne()
 }
 
 /*
-Automato 25
-Autor: Marcos
-
-<mais_expressao>                 ::= , <expressao> <mais_expressao>
-							       | epsilon
-*/
-
-int mais_expressao()
-{
-	int ret;
-
-	while(strcmp(tk->string, ",") == SUCCESS)
-   {
-      tk = get_token();
-      CALL(expressao);
-   }
-
-	return SUCCESS;
-}
-
-/*
-Automato 26
+Automato 22
 Autor: Marcos
 
 <selecao>                        ::= <constantes> : <comandos> <selecao>
@@ -941,7 +927,7 @@ int selecao()
 }
 
 /*
-Automato 27
+Automato 23
 Autor: Marcos
 
 <constantes>             ::=   NUM_INT .. - NUM_INT , <constantes>
@@ -992,7 +978,7 @@ int constantes()
 }
 
 /*
-Automato 28
+Automato 24
 Autor: Marcos
 
 <exp_aritmetica>                 ::= <termo> <outros_termos>
@@ -1003,16 +989,24 @@ int exp_aritmetica()
    int ret;
 
 	CALL(termo);
-	CALL(outros_termos);
+
+	while(strcmp(tk->string, "+") == SUCCESS || strcmp(tk->string, "-") == SUCCESS)
+   {
+	   tk = get_token();
+	   CALL(termo);
+   }
 
 	return SUCCESS;
 }
 
 /*
-Automato 29
+Automato 25
 Autor: Marcos
 
 <termo>                          ::= <fator> <outros_fatores>
+<outros_fatores>                 ::= * <fator> <outros_fatores>
+								   | / <fator> <outros_fatores>
+								   | e
 */
 
 int termo()
@@ -1020,74 +1014,21 @@ int termo()
    int ret;
 
 	CALL(fator);
-	CALL(outros_fatores);
-
-	return SUCCESS;
-}
-
-/*
-Automato 30
-Autor: Marcos
-
-<outros_termos>                  ::= + <termo> <outros_termos>
-								   | - <termo> <outros_termos>
-								   | epsilon
-*/
-
-int outros_termos()
-{
-   int ret;
-
-	while(strcmp(tk->string, "+") == SUCCESS || strcmp(tk->string, "-") == SUCCESS)
-   {
-	   tk = get_token();
-	   CALL(termo);
-   }
-	return SUCCESS;
-}
-
-/*
-Automato 31
-Autor: Marcos
-
-<fator>                          ::= <parcela> <outras_parcelas>
-*/
-
-int fator()
-{
-   int ret;
-
-	CALL(parcela);
-	CALL(outras_parcelas);
-
-	return SUCCESS;
-}
-
-/*
-Automato 32
-Autor: Marcos
-
-<outros_fatores>                 ::= * <fator> <outros_fatores>
-								   | / <fator> <outros_fatores>
-								   | e
-*/
-
-int outros_fatores()
-{
-   int ret;
 
 	while(strcmp(tk->string, "*") ==  SUCCESS || strcmp(tk->string, "/") == SUCCESS)
    {
       tk = get_token();
       CALL(fator);
    }
-   return SUCCESS;
+
+	return SUCCESS;
 }
 
-
 /*
-Automato 33
-Autor: Nathan
+Automato 26
+Autor: Marcos
+
+<fator>                          ::= <parcela> <outras_parcelas>
 
 <parcela> ::= - ^ IDENT <outros_ident> <dimensao>
             | - IDENT <chamada_partes>
@@ -1102,104 +1043,92 @@ Autor: Nathan
             | & IDENT <outros_ident> <dimensao>
             | CADEIA
 
-*/
-
-int parcela()
-{
-   int ret;
-
-   if( strcmp(tk->string, "&") == SUCCESS || tk->class == string )
-   {
-      if(strcmp(tk->string,"&") == SUCCESS)
-      {
-          tk = get_token();
-
-          CHECK_CLASS(tk,identifier);
-          tk = get_token();
-
-          CALL(outros_ident);
-          CALL(dimensao);
-      }
-      else
-      {
-          tk = get_token();
-      }
-   }
-   else
-   {
-      if(strcmp(tk->string,"-") == SUCCESS)
-         tk = get_token();
-
-      if(strcmp(tk->string,"^") == SUCCESS)
-      {
-         tk = get_token();
-
-         CHECK_CLASS(tk, identifier);
-         tk = get_token();
-
-         CALL(outros_ident);
-         CALL(dimensao);
-
-      }
-      else if(tk->class == identifier)
-      {
-         tk = get_token();
-         CALL(chamada_partes);
-      }
-      else if(tk->class == integer_number)
-      {
-         tk = get_token();
-      }
-      else if(tk->class == real_number)
-      {
-         tk = get_token();
-      }
-      else
-      {
-         CHECK_STRING(tk,"(");
-         tk = get_token();
-
-         CALL(expressao);
-
-         CHECK_STRING(tk,")");
-         tk = get_token();
-      }
-   }
-   return SUCCESS;
- }
-
-
-/*
-Automato 34
-Autor: Nathan
-
 <outras_parcelas> ::= % <parcela> <outras_parcelas> | epsilon
-
 */
 
-int outras_parcelas()
+int fator()
 {
    int ret;
-   while(strcmp(tk->string,"%") == SUCCESS)
-   {
-      tk = get_token();
-      CALL(parcela);
-   }
-   return SUCCESS;
+
+	while (1)
+	{
+		if( strcmp(tk->string, "&") == SUCCESS || tk->class == string )
+		{
+		   if(strcmp(tk->string,"&") == SUCCESS)
+		   {
+		       tk = get_token();
+
+		       CHECK_CLASS(tk,identifier);
+		       tk = get_token();
+
+		       CALL(outros_ident);
+		       CALL(dimensao);
+		   }
+		   else
+		   {
+		       tk = get_token();
+		   }
+		}
+		else
+		{
+		   if(strcmp(tk->string,"-") == SUCCESS)
+		      tk = get_token();
+
+		   if(strcmp(tk->string,"^") == SUCCESS)
+		   {
+		      tk = get_token();
+
+		      CHECK_CLASS(tk, identifier);
+		      tk = get_token();
+
+		      CALL(outros_ident);
+		      CALL(dimensao);
+
+		   }
+		   else if(tk->class == identifier)
+		   {
+		      tk = get_token();
+		      CALL(chamada_partes);
+		   }
+		   else if(tk->class == integer_number)
+		   {
+		      tk = get_token();
+		   }
+		   else if(tk->class == real_number)
+		   {
+		      tk = get_token();
+		   }
+		   else
+		   {
+		      CHECK_STRING(tk,"(");
+		      tk = get_token();
+
+		      CALL(expressao);
+
+		      CHECK_STRING(tk,")");
+		      tk = get_token();
+		   }
+		}
+
+		if(strcmp(tk->string,"%") != SUCCESS)
+			break;
+
+		tk = get_token();
+	}
+
+	return SUCCESS;
 }
 
-
-
-
-
 /*
-Automato 35
+Automato 27
 Autor: Nathan
 
 <chamada_partes>  ::= ( <expressao> <mais_expressao> )
                     | <outros_ident> <dimensao>
                     | epsilon
 
+<mais_expressao>                 ::= , <expressao> <mais_expressao>
+							       | epsilon
 */
 
 int chamada_partes()
@@ -1210,7 +1139,12 @@ int chamada_partes()
       tk = get_token();
 
       CALL(expressao);
-      CALL(mais_expressao);
+
+      while(strcmp(tk->string, ",") == SUCCESS)
+   	{
+      	tk = get_token();
+      	CALL(expressao);
+   	}
 
       CHECK_STRING(tk,")");
       tk = get_token();
@@ -1224,7 +1158,7 @@ int chamada_partes()
 }
 
 /*
-Automato 36
+Automato 28
 Autor: Nathan
 
 <parcela_logica> ::= verdadeiro
@@ -1263,66 +1197,40 @@ int parcela_logica()
 
 
 /*
-Automato 37
+Automato 29
 Autor: Nathan
 
 <expressao>                      ::= <termo_logico> <outros_termos_logicos>
+
+<termo_logico> ::= nao <parcela_logica> <outros_fatores_logicos>
+                 | <parcela_logica> <outros_fatores_logicos>
+
+<outros_termos_logicos>   ::= ou <termo_logico> <outros_termos_logicos>  | epsilon
 
 */
 int expressao()
 {
    int ret;
-   CALL(termo_logico);
-   CALL(outros_termos_logicos);
+
+	while (1)
+	{
+		if(strcmp(tk->string,"nao") == SUCCESS)
+		   tk = get_token();
+
+		CALL(parcela_logica);
+		CALL(outros_fatores_logicos);
+		
+		if (strcmp(tk->string,"ou") != SUCCESS)
+			break;		
+		
+		tk = get_token();
+	}
 
    return SUCCESS;
 }
 
-
 /*
-Automato 38
-Autor: Nathan
-
-<termo_logico> ::= nao <parcela_logica> <outros_fatores_logicos>
-                 | <parcela_logica> <outros_fatores_logicos>
-*/
-
-int termo_logico()
-{
-   int ret;
-   if(strcmp(tk->string,"nao") == SUCCESS)
-      tk = get_token();
-
-   CALL(parcela_logica);
-   CALL(outros_fatores_logicos);
-
-   return SUCCESS;
-}
-
-
-
-/*
-Automato 39
-Autor: Nathan
-
-<outros_termos_logicos>   ::= ou <termo_logico> <outros_termos_logicos>  | epsilon
-
-*/
-
-int outros_termos_logicos()
-{
-   int ret;
-   while(strcmp(tk->string,"ou") == SUCCESS)
-   {
-      tk = get_token();
-      CALL(termo_logico);
-   }
-   return SUCCESS;
-}
-
-
-/*
-Automato 40
+Automato 30
 Autor: Nathan
 
 <outros_fatores_logicos>   ::= e nao <parcela_logica> <outros_fatores_logicos>
