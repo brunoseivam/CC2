@@ -7,7 +7,7 @@ Integrantes:
 	Bruno Seiva Martins 	321710
 	Lucas Maziero Russo 	321583
 	Marcos Vinicius Campelo 321508
-	Nathan Augusto Ozelim 	32151699
+	Nathan Augusto Ozelim 	321516
 	Talita Meirelles 	321729
 
 Para compilar
