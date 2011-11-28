@@ -260,6 +260,8 @@ static int  btreei_insert(struct btreei_node* n, void* key, void* value, int ord
          ++i;
       }
    }
+   /* SHOULDN'T BE HERE */
+   return BTREE_ERROR;
 }
 
 void* btreei_remove(struct btreei_node* n, void* key, int order, int (*compare)(const void*, const void*))

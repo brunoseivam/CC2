@@ -6,6 +6,7 @@
 
 #define BTREE_SUCCESS 1
 #define BTREE_FAIL    0
+#define BTREE_ERROR  -1
 
 typedef struct btree
 {
