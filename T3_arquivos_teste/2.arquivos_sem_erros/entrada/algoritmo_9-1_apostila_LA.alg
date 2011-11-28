@@ -1,0 +1,64 @@
+{ a partir de dois números racionais, calcular e apresentar a soma e a multiplicação de ambos }
+
+algoritmo
+	tipo tRacional: registro
+				numerador, denominador: inteiro
+			fim_registro
+	declare
+		numero1, numero2, resultado: tRacional
+	declare valor1, valor2, resto: inteiro
+
+	{ obtenção dos números }
+	escreva("Numerador do primeiro racional: ")
+	leia(numero1.numerador)
+	escreva("Denominador do primeiro racional: ")
+	leia(numero1.denominador)
+	escreva("Numerador do segundo racional: ")
+	leia(numero2.numerador)
+	escreva("Denominador do segundo racional: ")
+	leia(numero2.denominador)
+
+	{ cálculo da soma }
+	resultado.numerador <- numero1.numerador * numero2.denominador +
+				numero1.denominador * numero2.numerador
+	resultado.denominador <- numero1.denominador * numero2.denominador
+
+	{ cálculo do MDC }
+	valor1 <- resultado.numerador
+	valor2 <- resultado.denominador
+
+	faca
+		resto <- valor1 % valor2
+		valor1 <- valor2
+		valor2 <- resto
+	ate resto = 0 	{ resultado do MDC fica em valor1 }
+
+	{ simplificação da razão }
+	resultado.numerador <- resultado.numerador/valor1
+	resultado.denominador <- resultado.denominador/valor1
+
+	{ escrita da soma }
+	escreva(resultado.numerador, "/", resultado.denominador)
+
+	{ cálculo do produto }
+	resultado.numerador <- numero1.numerador * numero2.numerador
+	resultado.denominador <- numero1.denominador * numero2.denominador
+
+	{ cálculo do MDC }
+	valor1 <- resultado.numerador
+	valor2 <- resultado.denominador
+
+	faca
+		resto <- valor1 % valor2
+		valor1 <- valor2
+		valor2 <- resto
+	ate resto = 0	{ resultado do MDC fica em valor1 }
+
+	{ simplificação da razão }
+	resultado.numerador <- resultado.numerador/valor1
+	resultado.denominador <- resultado.denominador/valor1
+
+	{ escrita do produto }
+	escreva(resultado.numerador, "/", resultado.denominador)
+
+fim_algoritmo

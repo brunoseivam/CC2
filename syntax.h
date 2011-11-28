@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "lex.h"
+#include "semant.h"
 
 /* As macros abaixo servem para trechos comuns do código, que se repetiriam muitas vezes.
    Além disso, elas provém certa elegância no código, pois, por exemplo, é mais significativo ler

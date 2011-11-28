@@ -1,0 +1,44 @@
+{ verificação se um projétil, lançado de um ângulo de a graus em relação ao solo colide ou não com um objeto situado em seu caminho, sabendo-se a distância do lançamento e a espessura e altura do objeto; o resultado produzido é verdadeiro se há colisão e falso caso contrário }
+
+{ A Figura 4-1 deve ser consultada para melhor referência (apostila de Construção de Algoritmos, página 24) }
+
+algoritmo
+	{ declarações }
+	declare
+		angulo, velocidadeInicial, distancia, espessura, altura,
+		momento1, momento2, alturaProjetil1, alturaProjetil2: real
+	declare
+		colidiu: logico
+
+	{ obtenção do ângulo, v0, distância do objeto, sua espessura e altura }
+	escreva("Angulo de lancamento: ")
+	leia(angulo)
+	escreva("Velocidade inicial (m/s): ")
+	leia(velocidadeInicial)
+	escreva("Distancia do objeto (m): ")
+	leia(distancia)
+	escreva("Espessura do objeto (m): ")
+	leia(espessura)
+	escreva("Altura do objeto (m): ")
+	leia(altura)
+
+	{ cálculo dos momentos em que o projétil passa pelos limites do objeto }
+	momento1 <- distancia/(velocidadeInicial * cos(angulo * 3.1415/180))
+	momento2 <- (distancia + espessura)/(velocidadeInicial * cos(angulo * 3.1415/180))
+				{ 3.1415 é aproximação para pi na conversão para radianos }
+
+	{ cálculo da altura do projétil nestes dois momentos }
+	alturaProjetil1 <- velocidadeInicial * sen(angulo * 3.1415/180) *
+				momento1 - 9.8 * pot(momento1, 2)/2
+
+	alturaProjetil2 <- velocidadeInicial * sen(angulo * 3.1415/180) *
+				momento2 - 9.8 * pot(momento2, 2)/2
+
+	{ verificação se em algum desses dois momentos o projétil não está acima da altura do objeto }
+	colidiu <- alturaProjetil1 <= altura e alturaProjetil1 > 0 e
+			alturaProjetil2 <= altura e alturaProjetil2 > 0
+
+	{ escrita do resultado }
+ 	escreva("Houve colisao?", colidiu)
+
+fim_algoritmo

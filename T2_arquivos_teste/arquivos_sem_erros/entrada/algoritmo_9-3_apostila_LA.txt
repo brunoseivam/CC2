@@ -1,0 +1,33 @@
+{ algoritmo simples (e sem função específica) que ilustra o formato e as consequências de sub-rotinas com passagem de parâmetros por valor e por referência }
+
+procedimento escrevaInteiroEFracionario(valor: real)
+{ escreve as partes inteira e fracionária de um valor }
+
+	escreva("Parte inteira:", int(valor))
+	valor <- valor - int(valor)
+	escreva("Parte fracionaria:", valor)
+
+fim_procedimento
+
+procedimento transformeEmPositivo(var valor: real)
+{ transforma o valor de um número real em positivo }
+	
+	se valor < 0 entao
+		valor <- -valor { transforma em positivo }
+	fim_se
+fim_procedimento
+
+algoritmo
+	declare numero: real
+
+	{ o valor "especial" 999 indica o término }
+	faca
+		leia(numero)
+
+		escrevaInteiroEFracionario(numero)
+
+		escreva("O modulo eh:")
+		transformeEmPositivo(numero)
+		escreva(numero)
+	ate numero = 999
+fim_algoritmo

@@ -1,0 +1,39 @@
+{ listar o(s) melhor(es) aluno(s) de uma turma de alunos, dadas as notas de três provas (sabendo-se que todas possuem o mesmo peso no cálculo da média) e tendo-se o número total de alunos }
+
+algoritmo
+	{ declarações }
+	constante maximoAlunos: inteiro = 150
+	declare
+		i: inteiro
+	declare
+		notaProva1, notaProva2, notaProva3, melhorMedia: real
+	declare
+		nomeAluno[maximoAlunos]: literal
+	declare
+		media[maximoAlunos]: real
+
+	{ obtenção do número de alunos }
+	leia(numeroAlunos)
+
+	se numeroAlunos > maximoAlunos entao
+		escreva("Numero maximo de alunos eh", maximoAlunos)
+	senao
+		{ obtenção dos dados, cálculo das médias e seleção da melhor }
+		melhorMedia <- -1 { força substituição }
+		para i <- 0 ate numeroAlunos - 1 faca			
+			leia(nomeAluno[i], notaProva1, notaProva2, notaProva3)
+			media[i] <- (notaProva1 + notaProva2 + notaProva3)/3
+			se media[i] > melhorMedia entao
+				melhorMedia <- media[i]
+			fim_se
+		fim_para
+	fim_se
+
+	{ apresentação dos resultados }
+	escreva("Melhor nota final:", melhorMedia)
+	para i <- 0 ate numeroAlunos - 1 faca
+		se media[i] = melhorMedia entao
+			escreva("Nome do aluno:", nomeAluno[i])
+		fim_se
+	fim_para
+fim_algoritmo

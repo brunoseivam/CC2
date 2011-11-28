@@ -1,0 +1,5 @@
+Arquivos sem erros léxicos, sintáticos ou semânticos, ou seja, arquivos corretos. Para esses arquivos de entrada os arquivos com código C devem ser gerados. No diretório 'saida' existem exemplos em código C para cada um dos arquivos de entrada.
+
+Para a tradução de algumas funções e adaptações, foi criado um código separado (basicos.c e basicos.h) em "auxiliares" usado nos programas. 
+A compilação dos programas com funções matemáticas precisam, também, da opção "-lm" no gcc. 
+Veja compila.sh para gerar todos os executáveis a partir dos códigos em C de exemplo.

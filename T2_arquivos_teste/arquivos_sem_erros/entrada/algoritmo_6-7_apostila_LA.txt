@@ -1,0 +1,33 @@
+{ determinar a menor temperatura de um conjunto, sabendo-se a quantidade de valores disponíveis }
+
+algoritmo
+	declare
+		i, numeroEntradas: inteiro
+	declare
+		temperatura, menorTemperatura: real
+
+	{ obtenção da quantidade de itens }
+	leia(numeroEntradas)
+	
+	se numeroEntradas <= 0 entao
+		escreva("Nao ha dados; portanto nao ha menor temperatura")
+	senao
+		{ leitura da primeira temperatura, em separado }
+		leia(temperatura)
+		menorTemperatura <- temperatura { a primeira é a menor }
+
+		{ repetição para leitura das outras temperaturas}
+		para i <- 2 ate numeroEntradas faca
+			{ leitura}
+			leia(temperatura)
+
+			{ verificação do maior preço }
+			se temperatura < menorTemperatura entao
+				menorTemperatura <- temperatura
+			fim_se
+		fim_para
+
+		{ resultado }
+		escreva(menorTemperatura)
+	fim_se
+fim_algoritmo

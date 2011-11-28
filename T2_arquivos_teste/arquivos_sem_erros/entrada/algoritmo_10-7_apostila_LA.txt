@@ -1,0 +1,158 @@
+{ exemplo de utilização de algumas operações sobre matrizes matemáticas }
+
+constante
+	maximoLinhas: inteiro = 100
+constante
+	maximoColunas: inteiro = 100
+
+	tipo tMatriz: registro
+						numeroLinhas, numeroColunas: inteiro
+						dados[maximoLinhas][maximoColunas]: real
+					fim_registro
+
+procedimento leiaMatriz(var matriz: tMatriz)
+{ obtenção dos dados da matriz, incluindo as dimensões }
+
+	declare i, j: inteiro
+
+	{ obtenção das dimensões }
+	faca
+		leia(matriz.numeroLinhas, matriz, numeroColunas)
+	ate matriz.numeroLinhas > 0 e matriz.numeroLinhas < maximoLinhas e matriz.numeroColunas > 0 e matriz.numeroColunas < maximoColunas
+
+	{ leiura dos dados }
+	para i <- 0 ate matriz.numeroLinhas - 1 faca
+		para j <- 0 ate matriz.numeroColunas - 1 faca
+			leia(matriz.dados[i][j])
+		fim_para
+	fim_para
+fim_procedimento
+
+procedimento escrevaMatriz(matriz: tMatriz)
+{ escrita dos dados armazenados na matriz }
+	declare i, j: inteiro
+
+	{ saída }
+	se matriz.numeroLinhas <= 0 ou matriz.numeroColunas <= 0 entao
+		escreva("Matriz invalida")
+	senao
+		{ apresentação da matriz }
+		para i <- 0 ate matriz.numeroLinhas - 1 faca
+			para j <- 0 ate matriz.numeroColunas - 1 faca
+				escreva(matriz.dados[i][j])
+			fim_para
+		fim_para
+	fim_se
+fim_procedimento
+
+funcao ehQuadrada(matriz: tMatriz): logico
+{ verifica se uma matriz é quadrada }
+	retorne matriz.NumeroLinhas = matriz.numeroColunas
+fim_funcao
+
+funcao tracoMatriz(matriz: tMatriz): real
+{ calcula o traço da matriz; se não for quadrada, retorna 0 }
+	declare i: inteiro
+	declare soma: real
+
+	{ soma os elementos da diagonal principal }
+	soma <- 0
+	se ehQuadrada(matriz) entao
+		para i <- 0 ate matriz.numeroLinhas faca
+			soma <- soma + matriz.dados[i][i]
+		fim_para
+	fim_se
+
+	{ resultado }
+	retorne soma
+fim_funcao
+
+procedimento multipliqueMatriz(var resultado: tMatriz, matriz1, matriz2: tMatriz)
+{ calcula a multiplicação de duas matrizes; se as dimensões não forem compatíveis, retorna uma matriz inválida (0 x 0) }
+	
+	{ verificação das dimensões }
+	se matriz1.numeroColunas <> matriz1.numeroLinhas entao
+		{ não é possível multiplicar }
+		resultado.numeroLinhas <- 0
+		resultado.numeroColunas <- 0
+	senao
+		{ calcula a multiplicação }
+		resultado.numeroLinhas <- matriz1.numeroLinhas
+		resultado.numeroColunas <- matriz2.numeroColunas
+		para i <- 0 ate resultado.numeroLinhas - 1 faca
+			para j <- 0 ate resultado.numeroColunas - 1 faca
+				resultado.dados[i][j] <- 0		{ usa como acumulador }
+				para k <- 0 ate matriz1.numeroColunas - 1 faca
+					resultado.dados[i][j] <- resultado.dados[i][j] + matriz1.dados[i][k] * matriz2.dados[k][j]
+				fim_para
+			fim_para
+		fim_para
+	fim_se
+fim_procedimento
+
+funcao temDiagonalZero(matriz: tMatriz): logico
+{ retorna verdadeiro se todos os elementos da diagonal principal forem nulos; se não forem nulos ou a matriz não for quadrada, retorna falso }
+	declare
+		tudoCerto: logico
+	declare
+		i: inteiro
+
+	{ verificação }
+	tudoCerto <- ehQuadrada(matriz)
+	i <- 0
+	enquanto i < matriz.numeroLinhas e tudoCerto faca
+		tudoCerto <- matriz.dados[i][i] = 0
+		i <- i + 1
+	fim_enquanto
+
+	retorne tudoCerto
+fim_funcao
+
+algoritmo
+	declare
+		numeroLeituras: inteiro
+	declare
+		traco, maiorTraco: real
+	declare
+		matriz, matrizSelecionada: tMatriz
+
+	{ iniciação }
+	maiorTraco <- -100000000000000000000
+
+	{ leitura dos dados }
+	leia(numeroLeituras)
+	para i <- 1 ate numeroLeituras faca
+		{ leitura dos dados da matriz }
+		leiaMatriz(matriz)
+
+		{ seleção da matriz de maior traço }
+		traco <- tracoMatriz(matriz)
+		se traco > maiorTraco entao
+			maiorTraco <- traco
+			matrizSelecionada <- matriz
+		fim_se
+
+		{ alguns dados sobre a matriz digitada }
+		escreva("O traco eh", traco)
+		se nao ehQuadrada(matriz) entao
+			escreva("A matriz nao eh quadrada")
+		senao
+			escreva("A matriz eh quadrada")
+			se temDiagonalZero(matriz) entao
+				escreva("Todos os valores da diagonal sao zero")
+			senao
+				escreva("Algum valor na diagonal nao eh nulo")
+			fim_se
+		fim_se
+	fim_para
+
+	{ mais uma informação }
+	{ obs.: assume-se que nenhum traço resulte em 10-20 }
+	se maiorTraco = -100000000000000000000 entao
+		escreva("Nenhuma matriz digitada foi quadrada")
+	senao
+		escreva("O maior traco entre as matrizes foi", maiorTraco)
+		escreva("Matriz de maior traco:")
+		escrevaMatriz(matrizSelecionada)
+	fim_se
+fim_algoritmo

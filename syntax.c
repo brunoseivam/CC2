@@ -2,7 +2,8 @@
 #include <stdio.h>
 
 #include "syntax.h"
-{
+
+
 /* Caso a estrutura first contenha apenas uma string OU
      uma token_class OU um ponteiro ficou decidido que
      seria codificado diretamente no autômato */
@@ -141,7 +142,7 @@ const firsts constantes_firsts =
    As macros utilizadas estão explicadas em syntax.h, onde estão definidas.
 */
 
-}
+
 
 /*
 Automato 1
@@ -216,12 +217,16 @@ int declaracao_local()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
+
+      /*sem_insert_pending(constant, tk->string);*/
       tk = get_token();
 
       CHECK_STRING(tk, ":");
       tk = get_token();
 
       CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
+
+
    	tk = get_token();
 
       CHECK_STRING(tk, "=");
@@ -266,7 +271,10 @@ int variavel()
 	while (1)
 	{
 		CHECK_CLASS(tk, identifier);
-		tk = get_token();
+
+      sem_insert_pending(tk->string, variable);
+
+      tk = get_token();
 
 		CALL(dimensao);
 
@@ -275,7 +283,6 @@ int variavel()
 
 		tk = get_token();
 	}
-
 	CHECK_STRING(tk, ":");
    tk = get_token();
 
@@ -372,6 +379,8 @@ int tipo()
    {
       CALL(tipo_estendido);
    }
+
+   /*sem_complete(SEM_VARIABLES, ...)*/
    return SUCCESS;
 }
 
@@ -389,7 +398,10 @@ tipo_estendido ::=  ^ IDENT
 int tipo_estendido()
 {
    if ( strcmp(tk->string, "^") == SUCCESS )
+   {
+      /*sem_update_pending(SEM_UPD_POINTER, 1);*/
       tk = get_token();
+   }
 
    if ( tk->class == identifier )
       tk = get_token();
@@ -429,7 +441,10 @@ int declaracao_global()
       tk = get_token();
 
       if ( search_first(tk, parametro_firsts) == SUCCESS )
+      {
          CALL(parametro);
+         /*++num_param;*/
+      }
 
       CHECK_STRING(tk, ")");
       tk = get_token();

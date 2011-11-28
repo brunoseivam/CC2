@@ -1,6 +1,9 @@
 #include "common.h"
 #include "lex.h"
 #include "syntax.h"
+#include "semant.h"
+
+/* TODO: tk's are never freed */
 
 /* Trata erro.
      Primeiro checa o token caso ele seja ERROR1 ou ERROR2. Se não for nenhum dos dois erros léxicos, é um erro sintático
@@ -45,12 +48,16 @@ int main(int argc, char** argv)
       return 1;
    }
 
+   sem_init_table();
+
    if((ret = programa()) != SUCCESS)
       handle_error(ret);               /* Trata o erro, caso exista */
 
    fprintf(out_file, "Fim da compilacao\n");
    close_files();                      /* Fecha os arquivos abertos */
 
+   btree_print(sem_table);
+   sem_print_stack();
 
    return 0;
 }

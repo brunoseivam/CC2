@@ -1,0 +1,3 @@
+Esses arquivos apresentam exemplos de como a correção dos arquivos corretos será realizada. 
+Os arquivos de entrada, no diretório 1.entrada, devem ser compilados pelo trabalho gerando código em C como o apresentado no diretório 2.codigo_C com o auxílio dos arquivos auxiliares em 2.entrada_codigo_C. 
+Em seguida, os arquivos .c serão compilados (gcc) e executados com as entradas em 3.entrada_execucao. A saída da execução deverá ser a mesma apresentada nos arquivos do diretório 4.saida.

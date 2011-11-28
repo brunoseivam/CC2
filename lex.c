@@ -272,20 +272,3 @@ void print_token        (token* tk)
    }
 }
 
-/*
-int main(int argc, char** argv)
-{
-   tk != null (EOF)
-   while((tk = get_token()))
-   {
-      print_token(tk);
-      free(tk->string);
-      free(tk);
-      fflush(stdout);
-   }
-   fclose(in_file);
-   fclose(out_file);
-
-   return 0;
-}*/
-

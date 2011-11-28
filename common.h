@@ -20,7 +20,6 @@
 #define  COMMENTERROR      -2    /* Comentário não fechado */
 #define  SYNTAXERROR       -3    /* Erro de sintaxe */
 
-
 typedef enum token_class
 {
    identifier = 1,
