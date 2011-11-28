@@ -2,26 +2,63 @@
 
 /* btreei_ prefix marks B Tree Internal functions */
 
-static btreei_node*   btreei_get_node   (int order);
-static int            btreei_is_leaf    (btreei_node* n);
-static void           btreei_check_size (btreei_node* n, int order);
-static void           btreei_insert     (btreei_node* n, void* key, void* value, int order, btreei_node* left, btreei_node* right);
-static int            btreei_remove     (btreei_node* n, void* key, int order);
-static btreei_node*   btreei_find       (btreei_node* n, void* key);
-
-
-static btreei_node* btreei_get_node(int order)
+struct btreei_node
 {
-   int            i;
-   btreei_node*   n;
+   void**               keys;          /* Array of keys of values                */
+   void**               values;        /* Array of values of the node            */
+   struct btreei_node** pointers;      /* Array of pointers to other nodes       */
+   struct btreei_node*  parent;        /* Parent node                            */
+   int                  length;        /* Number of values contained by the node */
+}btreei_node;
 
-   n = (btreei_node*) malloc(sizeof(btreei_node));
+
+static struct btreei_node*    btreei_get_node   (                int order);  /* Order of the tree          */
+
+static int                    btreei_is_leaf    (struct btreei_node* n);      /* Node to be checked         */
+
+static void                   btreei_check_size (struct btreei_node* n,       /* Node to be checked         */
+                                                                 int order,   /* Order of the tree          */
+                                                                 int (*compare)(const void*, const void*));
+                                                                              /* Compare two keys           */
+
+
+static int                    btreei_insert     (struct btreei_node* n,       /* Node to try insertion      */
+                                                               void* key,     /* Key being inserted         */
+                                                               void* value,   /* Value being inserted       */
+                                                                 int order,   /* Order of the tree          */
+                                                 struct btreei_node* left,    /* Auxiliary nodes being      */
+                                                 struct btreei_node* right,   /*    inserted                */
+                                                                 int (*compare)(const void*, const void*));
+                                                                              /* Compare two keys           */
+
+static void*                  btreei_remove     (struct btreei_node* n,       /* Node to try removal        */
+                                                               void* key,     /* Key to be removed          */
+                                                                 int order,   /* Order of the tree          */
+                                                                 int (*compare)(const void*, const void*));
+                                                                              /* Compare two keys           */
+
+static struct btreei_node*    btreei_find       (struct btreei_node* n,       /* Node to start search       */
+                                                               void* key,     /* Key being searched for     */
+                                                                 int (*compare)(const void*, const void*));
+                                                                              /* Compare two keys           */
+
+static void                   btreei_print      (struct btreei_node* n,       /* Node to start printing from*/
+                                                                 int level,   /* Current level of the tree  */
+                                                                void (*print_key_value)(const void*, const void*));
+                                                                              /* Prints a pair key/value    */
+
+static struct btreei_node* btreei_get_node(int order)
+{
+   int                     i;
+   struct btreei_node*     n;
+
+   n = (struct btreei_node*) malloc(sizeof(struct btreei_node));
 
    n->length   = 0;
    n->parent   = NULL;
-   n->values   = (void**)        malloc(   order *sizeof(void*)       );
-   n->keys     = (void**)        malloc(   order *sizeof(void*)       );
-   n->pointers = (btreei_node**) malloc((1+order)*sizeof(btreei_node*));
+   n->values   = (void**)               malloc(   order *sizeof(void*)              );
+   n->keys     = (void**)               malloc(   order *sizeof(void*)              );
+   n->pointers = (struct btreei_node**) malloc((1+order)*sizeof(struct btreei_node*));
 
    for(i = 0; i < order; ++i)
       n->pointers[i] = n->keys[i] = n->values[i] = NULL;
@@ -30,27 +67,27 @@ static btreei_node* btreei_get_node(int order)
    return n;
 }
 
-static int btreei_is_leaf(btreei_node* n)
+static int btreei_is_leaf(struct btreei_node* n)
 {
    return n->pointers[0] == NULL;
 }
 
-static void btreei_check_size(btreei_node* n, int order)
+static void btreei_check_size(struct btreei_node* n, int order, int (*compare)(const void*, const void*))
 {
    if(n->length == order) /* Divisão do nó */
    {
-      btreei_node* left  = btreei_get_node(order);
-      btreei_node* right = btreei_get_node(order);
+      struct btreei_node* left  = btreei_get_node(order);
+      struct btreei_node* right = btreei_get_node(order);
 
       int i;
 
       for(i = 0; i < order/2; ++i)
-         btreei_insert(left, n->keys[i], n->values[i], order, n->pointers[i], n->pointers[i+1]);
+         btreei_insert(left, n->keys[i], n->values[i], order, n->pointers[i], n->pointers[i+1], compare);
       for(i = order/2 + 1; i < order; ++i)
-         btreei_insert(right, n->keys[i], n->values[i], order, n->pointers[i], n->pointers[i+1]);
+         btreei_insert(right, n->keys[i], n->values[i], order, n->pointers[i], n->pointers[i+1], compare);
 
       if(n->parent != NULL)
-         btreei_insert(n->parent, n->keys[order/2], n->values[order/2], order, left, right);
+         btreei_insert(n->parent, n->keys[order/2], n->values[order/2], order, left, right, compare);
       else
       {
          n->keys[0]        = n->keys[order/2];
@@ -69,7 +106,7 @@ static void btreei_check_size(btreei_node* n, int order)
          if(n->length) return;   /* Pode ter order/2 elementos */
 
          /* Se vazio, promove primeiro filho a raiz */
-         btreei_node* son = n->pointers[0];
+         struct btreei_node* son    = n->pointers[0];
 
          int i = 0;
 
@@ -96,54 +133,56 @@ static void btreei_check_size(btreei_node* n, int order)
       else  /* Find sibilings */
       {
          int i = 0;
-         while((btree_compare_keys(n->parent->keys[i], n->keys[n->length-1]) < 0) && i < n->parent->length)
+         while((compare(n->parent->keys[i], n->keys[n->length-1]) < 0) && i < n->parent->length)
             ++i;
 
-         btreei_node* left_sibiling  = ((i>0) ? n->parent->pointers[i-1] : NULL);
-         btreei_node* right_sibiling = ((i < n->parent->length) ? n->parent->pointers[i+1] : NULL);
+         struct btreei_node* left_sibiling  = ((i>0) ? n->parent->pointers[i-1] : NULL);
+         struct btreei_node* right_sibiling = ((i < n->parent->length) ? n->parent->pointers[i+1] : NULL);
 
          if(left_sibiling && left_sibiling->length > order/2)
          {
             --i;
-            btreei_insert(n, n->parent->keys[i], n->parent->values[i], order, NULL, NULL);
+            btreei_insert(n, n->parent->keys[i], n->parent->values[i], order, NULL, NULL, compare);
 
             n->parent->keys[i]   = left_sibiling->keys  [left_sibiling->length-1];
             n->parent->values[i] = left_sibiling->values[left_sibiling->length-1];
 
-            btreei_remove(left_sibiling, n->parent->keys[i], order);
+            btreei_remove(left_sibiling, n->parent->keys[i], order, compare);
             return;
          }
          else if(right_sibiling && right_sibiling->length > order/2)
          {
-            btreei_insert(n, n->parent->keys[i], n->parent->values[i], order, NULL, NULL);
+            btreei_insert(n, n->parent->keys[i], n->parent->values[i], order, NULL, NULL, compare);
 
             n->parent->keys[i]   = right_sibiling->keys[0];
             n->parent->values[i] = right_sibiling->values[0];
 
-            btreei_remove(right_sibiling, n->parent->keys[i], order);
+            btreei_remove(right_sibiling, n->parent->keys[i], order, compare);
             return;
          }
          else if(left_sibiling)
          {
             --i;
-            btreei_insert(n, n->parent->keys[i], n->parent->values[i], order, n->pointers[0], n->pointers[0]);
+            btreei_insert(n, n->parent->keys[i], n->parent->values[i], order, n->pointers[0], n->pointers[0], compare);
 
             int j;
 
             for(j=0; j < left_sibiling->length; ++j)
-               btreei_insert(n, left_sibiling->keys[j], left_sibiling->values[j], order, left_sibiling->pointers[i], left_sibiling->pointers[i+1]);
+               btreei_insert(n, left_sibiling->keys[j], left_sibiling->values[j], order,
+                             left_sibiling->pointers[i], left_sibiling->pointers[i+1], compare);
 
             n->parent->pointers[i] = n;
          }
          else if(right_sibiling)
          {
-            btreei_insert(n, n->parent->keys[i], n->parent->values[i], order, n->pointers[n->length], n->pointers[n->length]);
+            btreei_insert(n, n->parent->keys[i], n->parent->values[i], order,
+                          n->pointers[n->length], n->pointers[n->length], compare);
 
             int j;
 
             for(j=0; j < right_sibiling->length; ++j)
-               btreei_insert(n, right_sibiling->keys[j], right_sibiling->values[j], order, right_sibiling->pointers[i], right_sibiling->pointers[i+1]);
-
+               btreei_insert(n, right_sibiling->keys[j], right_sibiling->values[j], order,
+                             right_sibiling->pointers[i], right_sibiling->pointers[i+1], compare);
 
             n->parent->pointers[i+1] = n;
 
@@ -160,36 +199,36 @@ static void btreei_check_size(btreei_node* n, int order)
          if(!n->parent->length)
             n->parent->pointers[0] = n;   /* Tell the empty root node that n will be its son*/
 
-         btreei_check_size(n->parent, order);
+         btreei_check_size(n->parent, order, compare);
       }
    }
 }
 
-static void btreei_insert(btreei_node* n, void* key, void* value, int order, btreei_node* left, btreei_node* right)
+static int  btreei_insert(struct btreei_node* n, void* key, void* value, int order,
+                          struct btreei_node* left, struct btreei_node* right, int (*compare)(const void*, const void*))
 {
+
    if(left!=NULL || btreei_is_leaf(n))
    {
       int i = 0;
       while(i < n->length)
       {
-         int comp = btree_compare_keys(key, n->keys[i]);
-         if(comp > 0)   /* key > n->keys[i] */
+         int comp = compare(key, n->keys[i]);
+
+         if(comp == 0)
+            return BTREE_FAIL;
+         else if(comp > 0)    /* key > n->keys[i] */
             ++i;
-         else if(comp < 0) /* key < n->keys[i] */
+         else                 /* key < n->keys[i] */
          {
             int j;
-            for(j = n->length; j > i; --j)   /* TODO: j = m->length -1 ??? */
+            for(j = n->length; j > i; --j)
             {
                n->keys[j]        = n->keys[j-1];
                n->values[j]      = n->values[j-1];
                n->pointers[j+1]  = n->pointers[j];
                n->pointers[j]    = n->pointers[j-1];
             }
-            break;
-         }
-         else
-         {
-            --n->length;
             break;
          }
       }
@@ -204,52 +243,40 @@ static void btreei_insert(btreei_node* n, void* key, void* value, int order, btr
          n->pointers[i+1]  = right;
       }
       ++n->length;
-      btreei_check_size(n, order);
-
+      btreei_check_size(n, order, compare);
+      return BTREE_SUCCESS;
    }
    else if(!btreei_is_leaf(n))
    {
       int i    = 0;
-      int comp = btree_compare_keys(n->keys[i], key);
-      while(i < n->length)
+
+      while(i <= n->length)
       {
-         if(comp > 0)   /* keys[i] > key */
-         {
-            btreei_insert(n->pointers[i], key, value, order, NULL, NULL);
-            return;
-         }
+         int comp = compare(n->keys[i], key);
+         if(comp == 0)
+            return BTREE_FAIL;
+         else if(comp > 0 || i==n->length)   /* keys[i] > key */
+            return btreei_insert(n->pointers[i], key, value, order, NULL, NULL, compare);
          ++i;
       }
-      if(i == n->length)
-         btreei_insert(n->pointers[i], key, value, order, NULL, NULL);
    }
 }
-/* TODO: return a proper value */
-int btree_insert(btree* tree, void* key, void* value)        /* Interface to the world */
-{
-   btreei_insert(tree->root, key, value, tree->order, NULL, NULL);
-   return 0;
-}
 
-int btree_remove(btree* tree, void* key)
+void* btreei_remove(struct btreei_node* n, void* key, int order, int (*compare)(const void*, const void*))
 {
-   /* use find before? TODO: */
-   if(btree_find(tree, key))     return btreei_remove(tree->root, key, tree->order);
-   else                          return 0;
-}
-
-int btreei_remove(btreei_node* n, void* key, int order)
-{
-   /* Procura pela posição do valor a ser removido */
+   /* Search for the value to be removed */
    int i;
-   int comp = 0;
+   int comp        = 0;
+   void* removed   = NULL;
 
    for(i = 0; i < n->length; ++i)
-      if((comp = btree_compare_keys(key, n->keys[0])) <= 0)
+      if((comp = compare(key, n->keys[0])) <= 0)
          break;
 
    if((i==n->length) || comp)
-      return btreei_is_leaf(n) ? 0 : btreei_remove(n->pointers[i], key, order);
+      return btreei_is_leaf(n) ? removed : btreei_remove(n->pointers[i], key, order, compare);
+
+   removed = n->values[i];
 
    if(btreei_is_leaf(n))
    {
@@ -260,13 +287,13 @@ int btreei_remove(btreei_node* n, void* key, int order)
       }
 
       --n->length;
-      btreei_check_size(n, order);
+      btreei_check_size(n, order, compare);
 
-      return 1;
+      return removed;
    }
    else
    {
-      btreei_node* swap_node = n->pointers[i+1];
+      struct btreei_node* swap_node = n->pointers[i+1];
       while(!btreei_is_leaf(swap_node))
          swap_node = swap_node->pointers[0];
 
@@ -279,24 +306,11 @@ int btreei_remove(btreei_node* n, void* key, int order)
       swap_node->keys[0]   = temp_key;
       swap_node->values[0] = temp_val;
 
-      return btreei_remove(swap_node, temp_key, order);
+      return btreei_remove(swap_node, temp_key, order, compare);
    }
 }
 
-
-void* btree_find(btree* tree, void* key)
-{
-   int          i;
-   btreei_node* n = btreei_find(tree->root, key);
-
-   for(i = 0; i < n->length;++i)
-      if(btree_compare_keys(key, n->keys[i]) == 0)
-         return n->values[i];
-
-   return NULL;
-}
-
-btreei_node* btreei_find(btreei_node* n, void* key)
+struct btreei_node* btreei_find(struct btreei_node* n, void* key, int (*compare)(const void*, const void*))
 {
    int i;
    int comp;
@@ -306,49 +320,74 @@ btreei_node* btreei_find(btreei_node* n, void* key)
 
    for(i=0; i < n->length; ++i)
    {
-      comp = btree_compare_keys(key, n->keys[i]);
+      comp = compare(key, n->keys[i]);
       if(comp == 0)
          return n;
       else if(comp < 0)
          break;
    }
-   return btreei_find(n->pointers[i], key);
+   return btreei_find(n->pointers[i], key, compare);
 }
 
-btree* btree_get_tree(int order)
-{
-   btree* t = (btree*) malloc(sizeof(btree));
-
-   t->root  = btreei_get_node(order);
-   t->order = order;
-
-   return t;
-}
-
-
-
-void  btree_print(btree* tree)
-{
-   btreei_print(tree->root, 1);
-}
-
-void btreei_print(btreei_node* n, int level)
+void btreei_print(struct btreei_node* n, int level, void (*print_key_value)(const void*, const void*))
 {
    int i;
 
-   if(!n)
-      return;
+   if(!n)   return;
 
    printf("Level %d: [(%d)", level, n->length);
 
-   for(i=0;i<n->length;++i)
+   for(i=0 ; i < n->length ; ++i)
    {
-      btree_print_value(n->values[i]);
+      print_key_value(n->keys[i], n->values[i]);
       printf(" ");
    }
    printf("]\n");
 
    if(!btreei_is_leaf(n))
       for(i=0;i<=n->length;++i)
-         btreei_print(n->pointers[i], level+1);
+         btreei_print(n->pointers[i], level+1, print_key_value);
+}
+
+
+
+
+
+btree* btree_get_tree(int order, int (*compare)(const void*, const void*))
+{
+   btree* t = (btree*) malloc(sizeof(btree));
+
+   t->root  = btreei_get_node(order);
+   t->order = order;
+
+   t->compare = compare;
+
+   return t;
+}
+
+int btree_insert(btree* tree, void* key, void* value)        /* Interface to the world */
+{
+   return btreei_insert(tree->root, key, value, tree->order, NULL, NULL, tree->compare);
+}
+
+void* btree_remove(btree* tree, void* key)
+{
+   return btreei_remove(tree->root, key, tree->order, tree->compare);
+}
+
+void* btree_find(btree* tree, void* key)
+{
+   int i;
+   struct btreei_node* n = btreei_find(tree->root, key, tree->compare);
+
+   for(i = 0; i < n->length;++i)
+      if(tree->compare(key, n->keys[i]) == 0)
+         return n->values[i];
+
+   return NULL;
+}
+
+void  btree_print(btree* tree, void (*print_key_value)(const void*, const void*))
+{
+   btreei_print(tree->root, 1, print_key_value);
 }

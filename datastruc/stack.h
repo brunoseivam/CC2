@@ -1,6 +1,12 @@
 #ifndef STACK_H
 #define STACK_H
 
+typedef struct stacki_node
+{
+   void*                value;
+   struct stacki_node*  next;
+}stacki_node;
+
 typedef struct stack
 {
 
