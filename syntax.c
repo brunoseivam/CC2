@@ -178,6 +178,8 @@ int programa()
 
    CHECK_STRING(tk, "algoritmo");
 
+
+
    /* TODO: mudar contexto
 
       FAZER FUNCAO DE "SUBIR" e "DESCER" contexto

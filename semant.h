@@ -31,6 +31,24 @@ typedef enum sem_pending_upd_type
 
 }sem_pending_upd_type;
 
+typedef enum sem_ctx_chg_type /* Semantic context change type */
+{
+   sem_ctx_global_to_local = 1,
+   sem_ctx_local_to_global,
+   sem_ctx_proc_func_declaration,
+   sem_ctx_register
+}
+
+typedef enum sem_error_type
+{
+   sem_error_ident_ja_declarado = 1,
+   sem_error_tipo_nao_declarado,
+   sem_error_ident_nao_declarado,
+   sem_error_incomp_de_parametros,
+   sem_error_atrib_nao_compativel,
+   sem_error_retorne_nao_permitido
+}
+
 typedef struct sem_entry
 {
    char*          string;
@@ -53,6 +71,9 @@ sem_table*  sem_global_table;
 sem_table*  sem_local_table;
 
 sem_table*  sem_current_table;
+
+stack*      sem_context_stack;
+
 
 void        sem_error         (int error_code);
 int         sem_compare_keys  (const void* key1, const void* key2);
