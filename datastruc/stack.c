@@ -6,22 +6,28 @@ struct stacki_node
    struct stacki_node*  next;
 }stacki_node;
 
-stack*   get_stack   ();
+stack*   stack_get      (void)
 {
    stack* s = (stack*) malloc(sizeof(stack));
    s->top   = NULL;
 
    return s;
 }
-void     stack_push  (stack* s, void* value)
+
+void     stack_dispose  (stack* s)
+{
+   free(s); /* TODO: ?? */
+}
+
+void     stack_push     (stack* s, void* value)
 {
 
-   struct stacki_node* n   = (struct stacki_node* s) malloc(sizeof(struct stacki_node));
+   struct stacki_node* n   = (struct stacki_node*) malloc(sizeof(struct stacki_node));
    n->value                = value;
    n->next                 = s->top;
    s->top                  = n;
 }
-void*    stack_pop   (stack* s)
+void*    stack_pop      (stack* s)
 {
    if(!s->top) return NULL;
 
@@ -33,7 +39,7 @@ void*    stack_pop   (stack* s)
    free(node);
    return value;
 }
-void*    stack_peek  (stack* s)
+void*    stack_peek     (stack* s)
 {
    if(!s->top) return NULL;
    return s->top->value;

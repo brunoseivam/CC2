@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "syntax.h"
+#include "generator.h"
 
 
 /* Caso a estrutura first contenha apenas uma string OU
@@ -177,6 +178,17 @@ int programa()
    }
 
    CHECK_STRING(tk, "algoritmo");
+
+   gen_main_begin();
+
+   /* TODO: mudar contexto
+
+      FAZER FUNCAO DE "SUBIR" e "DESCER" contexto
+      ao subir contexto, empilhar
+      ao descer, passar um argumento se deve apagar o more_info
+
+   */
+
    tk = get_token();
 
    while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
@@ -185,6 +197,9 @@ int programa()
    CALL(comandos);
 
    CHECK_STRING(tk, "fim_algoritmo");
+   
+   gen_main_end();
+
    tk = get_token();
 
    return SUCCESS;
@@ -217,23 +232,27 @@ int declaracao_local()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
-
-      /*sem_insert_pending(constant, tk->string);*/
+      CHECK_SEM(sem_pending_insert(tk->string, constant), 0);
       tk = get_token();
 
       CHECK_STRING(tk, ":");
       tk = get_token();
 
       CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
-
-
+      sem_pending_update(sem_upd_type, tk->string);
    	tk = get_token();
 
       CHECK_STRING(tk, "=");
       tk = get_token();
 
+      /* TODO: checar os tipos, se correspondem */
       if( tk->class != string && tk->class != integer_number && tk->class != real_number)
          CHECK_STRINGS(tk, "verdadeiro", "falso");
+      
+      gen_const(sem_current_table,tk->string);
+
+      sem_pending_commit();
+
       tk = get_token();
    }
    else if( strcmp(tk->string, "tipo") == SUCCESS)
@@ -241,11 +260,13 @@ int declaracao_local()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
+      CHECK_SEM(sem_pending_insert(tk->string, type_def), 0);
       tk = get_token();
 
       CHECK_STRING(tk, ":");
       tk = get_token();
 
+      /* TODO: mudar contexto */
       CALL(tipo);
    }
    else
@@ -272,7 +293,7 @@ int variavel()
 	{
 		CHECK_CLASS(tk, identifier);
 
-      sem_insert_pending(tk->string, variable);
+      CHECK_SEM(sem_pending_insert(tk->string, variable), 0);   /* TODO: correct-me */
 
       tk = get_token();
 
@@ -287,6 +308,10 @@ int variavel()
    tk = get_token();
 
    CALL(tipo);
+
+   gen_variable(sem_current_table);
+
+   sem_pending_commit();
 
 	return SUCCESS;
 }
@@ -366,7 +391,7 @@ int tipo()
    if( strcmp(tk->string, "registro") == SUCCESS)
    {
       tk = get_token();
-
+      /* TODO: trocar de contexto */
       do
       {
          CALL(variavel);
@@ -380,7 +405,6 @@ int tipo()
       CALL(tipo_estendido);
    }
 
-   /*sem_complete(SEM_VARIABLES, ...)*/
    return SUCCESS;
 }
 
@@ -399,17 +423,20 @@ int tipo_estendido()
 {
    if ( strcmp(tk->string, "^") == SUCCESS )
    {
-      /*sem_update_pending(SEM_UPD_POINTER, 1);*/
+      sem_pending_update(sem_upd_is_pointer, (void*) 1);
       tk = get_token();
    }
 
-   if ( tk->class == identifier )
-      tk = get_token();
-   else
-	{
+   if ( tk->class != identifier )
+   {
       CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
-   	tk = get_token();
-	}
+   }
+   /*else
+	{ MUDAR ORDEM IF ELSE
+       TODO: buscar tipo, ver se existe
+	}*/
+	sem_pending_update(sem_upd_type, (void*) tk->string);
+   tk = get_token();
 
    return SUCCESS;
 }

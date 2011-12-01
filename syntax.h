@@ -5,6 +5,7 @@
 #include "lex.h"
 #include "semant.h"
 
+
 /* As macros abaixo servem para trechos comuns do código, que se repetiriam muitas vezes.
    Além disso, elas provém certa elegância no código, pois, por exemplo, é mais significativo ler
 
@@ -65,6 +66,12 @@
                                     if(!count) return SYNTAXERROR;                        \
                                  }while(0)
 
+#define  CHECK_SEM(func, code)   do{                                                      \
+                                    if(func != BTREE_SUCCESS)                                   \
+                                    {                                                     \
+                                       sem_error(code);                                   \
+                                    }                                                     \
+                                 }while(0)
 
 /* Protótipos */
 

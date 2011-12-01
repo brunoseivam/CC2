@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define BTREE_SUCCESS 1
-#define BTREE_FAIL    0
+#define BTREE_SUCCESS 0
+#define BTREE_FAIL    1
 #define BTREE_ERROR  -1
 
 typedef struct btree
@@ -16,6 +16,7 @@ typedef struct btree
 }btree;
 
 btree*                btree_get_tree    (int order, int (*compare)(const void*, const void*));
+void                  btree_dispose     (btree* tree);
 
 int                   btree_insert      (btree* tree, void* key, void* value);
 void*                 btree_remove      (btree* tree, void* key);
