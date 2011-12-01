@@ -9,11 +9,6 @@
 #include "datastruc/stack.h"
 #include "common.h"
 
-#define  SEM_ENTRY_TYPE_STRING      "literal"
-#define  SEM_ENTRY_TYPE_INTEGER     "inteiro"
-#define  SEM_ENTRY_TYPE_REAL        "real"
-#define  SEM_ENTRY_TYPE_LOGIC       "logico"
-
 #define  SEM_BTREE_ORDER            5
 
 
@@ -59,7 +54,7 @@ sem_table*  sem_local_table;
 
 sem_table*  sem_current_table;
 
-void        sem_error(int error_code);
+void        sem_error         (int error_code);
 int         sem_compare_keys  (const void* key1, const void* key2);
 
 void        sem_init          (void);
