@@ -14,6 +14,8 @@ struct btreei_node
 
 static struct btreei_node*    btreei_get_node   (                int order);  /* Order of the tree          */
 
+static void                  btreei_dispose_node(struct btreei_node* n);      /* Free node memory           */
+
 static int                    btreei_is_leaf    (struct btreei_node* n);      /* Node to be checked         */
 
 static void                   btreei_check_size (struct btreei_node* n,       /* Node to be checked         */
@@ -47,6 +49,8 @@ static void                   btreei_print      (struct btreei_node* n,       /*
                                                                 void (*print_key_value)(const void*, const void*));
                                                                               /* Prints a pair key/value    */
 
+
+
 static struct btreei_node* btreei_get_node(int order)
 {
    int                     i;
@@ -65,6 +69,11 @@ static struct btreei_node* btreei_get_node(int order)
    n->pointers[i] = NULL;
 
    return n;
+}
+
+static void btreei_dispose_node(struct btreei_node* n)
+{
+   free(n);    /* TODO: ??? */
 }
 
 static int btreei_is_leaf(struct btreei_node* n)
@@ -365,6 +374,11 @@ btree* btree_get_tree(int order, int (*compare)(const void*, const void*))
    t->compare = compare;
 
    return t;
+}
+
+void btree_dispose(btree* tree)
+{
+   free(tree);    /* TODO: ?? */
 }
 
 int btree_insert(btree* tree, void* key, void* value)        /* Interface to the world */

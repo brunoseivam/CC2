@@ -65,6 +65,12 @@
                                     if(!count) return SYNTAXERROR;                        \
                                  }while(0)
 
+#define  CHECK_SEM(func, code)   do{                                                      \
+                                    if(func != BTREE_SUCCESS)                                   \
+                                    {                                                     \
+                                       sem_error(code);                                   \
+                                    }                                                     \
+                                 }while(0)
 
 /* Protótipos */
 

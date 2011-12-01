@@ -29,6 +29,12 @@ void handle_error()
 	}
 }
 
+void print_value(const void* key, const void* value)
+{
+   sem_entry* entry = (sem_entry* ) value;
+   printf("[%s:%s]", entry->string, entry->type);
+}
+
 int main(int argc, char** argv)
 {
    int ret;
@@ -48,7 +54,8 @@ int main(int argc, char** argv)
       return 1;
    }
 
-   sem_init_table();
+   sem_init();
+
 
    if((ret = programa()) != SUCCESS)
       handle_error(ret);               /* Trata o erro, caso exista */
@@ -56,8 +63,9 @@ int main(int argc, char** argv)
    fprintf(out_file, "Fim da compilacao\n");
    close_files();                      /* Fecha os arquivos abertos */
 
-   btree_print(sem_table);
-   sem_print_stack();
+
+   btree_print(sem_current_table->table, print_value);
+
 
    return 0;
 }
