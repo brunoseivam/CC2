@@ -3,7 +3,8 @@
 folder1="T2_arquivos_teste/arquivos_sem_erros"
 folder2="T2_arquivos_teste/arquivos_com_1_erro"
 
-gcc -Wall common.c lex.c syntax.c semant.c datastruc/btree.c datastruc/stack.c main.c -o compiler
+gcc -Wall common.c lex.c syntax.c semant.c generator.c datastruc/btree.c datastruc/stack.c main.c -o compiler
+
 ./compiler entrada.txt saida.txt
 
 exit

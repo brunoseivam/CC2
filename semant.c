@@ -95,7 +95,7 @@ int sem_table_find(sem_table* table, char* string)
 {
    if(btree_find(table->table, string)!=NULL)
       return SUCCESS;
-   return FAIL;
+   return ERROR;
 }
 
 int sem_pending_insert(char* string, sem_category category)
@@ -164,10 +164,9 @@ void sem_pending_commit(void)
 
 int sem_find(char* key)
 {
-   int
    return ((sem_table_find(sem_current_table, key) == SUCCESS) ||
             (sem_table_find(sem_global_table, key) == SUCCESS))
-         ? SUCCESS : FAIL;
+         ? SUCCESS : ERROR;
 }
 
 

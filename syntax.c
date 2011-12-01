@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "syntax.h"
+#include "generator.h"
 
 
 /* Caso a estrutura first contenha apenas uma string OU
@@ -179,6 +180,15 @@ int programa()
    CHECK_STRING(tk, "algoritmo");
 
    sem_context_change(sem_scope_global_to_local);
+   gen_main_begin();
+
+   /* TODO: mudar contexto
+
+      FAZER FUNCAO DE "SUBIR" e "DESCER" contexto
+      ao subir contexto, empilhar
+      ao descer, passar um argumento se deve apagar o more_info
+
+   */
 
    tk = get_token();
 
@@ -188,6 +198,9 @@ int programa()
    CALL(comandos);
 
    CHECK_STRING(tk, "fim_algoritmo");
+   
+   gen_main_end();
+
    tk = get_token();
 
    return SUCCESS;
@@ -232,14 +245,17 @@ int declaracao_local()
       sem_pending_update(sem_upd_type, tk->string);
    	tk = get_token();
 
-      sem_pending_commit();
-
       CHECK_STRING(tk, "=");
       tk = get_token();
 
       /* TODO: checar os tipos, se correspondem */
       if( tk->class != string && tk->class != integer_number && tk->class != real_number)
          CHECK_STRINGS(tk, "verdadeiro", "falso");
+      
+      gen_const(sem_current_table,tk->string);
+
+      sem_pending_commit();
+
       tk = get_token();
    }
    else if( strcmp(tk->string, "tipo") == SUCCESS)
@@ -295,6 +311,8 @@ int variavel()
    tk = get_token();
 
    CALL(tipo);
+
+   gen_variable(sem_current_table);
 
    sem_pending_commit();
 
