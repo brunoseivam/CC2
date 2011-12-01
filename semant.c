@@ -32,6 +32,8 @@ void sem_init(void)
 {
    sem_global_table  = sem_table_get();
    sem_current_table = sem_global_table;
+
+   sem_context_stack = stack_get();
 }
 
 sem_table* sem_table_get(void)
@@ -85,6 +87,7 @@ int sem_pending_insert(char* string, sem_category category)
    return SUCCESS;
 
 }
+
 void sem_pending_update(sem_pending_upd_type upd, void* value)
 {
    switch(upd)
@@ -138,9 +141,31 @@ int sem_find(char* key)
 }
 
 
-void sem_error(int error_code)
+void sem_error(sem_error_type error)
 {
-   printf("Linha %d: identificador %s ja declarado anteriormente\n", line_number, tk->string);
+   switch(error)
+   {
+      case sem_error_ident_ja_declarado:
+         printf("Linha %d: identificador %s ja declarado anteriormente\n", line_number, tk->string);
+         break;
+      case sem_error_tipo_nao_declarado:
+         printf("Linha %d: tipo %s nao declarado\n", line_number, tk->string);
+         break;
+      case sem_error_ident_nao_declarado:
+         printf("Linha %d: identificador %s nao declarado\n", line_number, tk->string);
+         break;
+      case sem_error_incomp_de_parametros:
+         printf("Linha %d: incompatibilidade de parametros na chamada de %s\n", line_number, tk->string);
+         break;
+      case sem_error_atrib_nao_compativel:
+         printf("Linha %d: atribuicao nao compativel para %s", line_number, tk->string);
+         break;
+      case sem_error_retorne_nao_permitido:
+         printf("Linha %d: comando retorne nao permitido nesse escopo\n", line_number);
+         break;
+      default:
+         printf("Codigo de erro %d nao conhecido. Linha: %d Token: %s", error, line_number, tk->string);
+   }
 }
 
 /*
