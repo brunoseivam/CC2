@@ -19,6 +19,32 @@ sem_entry* sem_entry_get(void)
    return entry;
 }
 
+sem_entry* sem_entry_clone(sem_entry* entry)
+{
+   sem_entry* new_entry = sem_entry_get();
+
+   if(entry->string)
+   {
+      new_entry->string = (char*) malloc( (1+strlen(entry->string))*sizeof(char));
+      strcpy(new_entry->string , entry->string);
+   }
+
+   new_entry->category   = entry->category;
+
+   if(entry->type)
+   {
+      new_entry->type = (char*) malloc( (1+strlen(entry->type))*sizeof(char));
+      strcpy(new_entry->type,entry->type);
+   }
+
+   new_entry->num_param  = entry->num_param;
+   new_entry->is_pointer = entry->is_pointer;
+
+   new_entry->more_info  = entry->more_info;    /* Aqui NAO será um clone */
+
+   return new_entry;
+}
+
 void sem_entry_dispose(sem_entry* entry)
 {
    free(entry->string);
@@ -32,6 +58,8 @@ void sem_init(void)
 {
    sem_global_table  = sem_table_get();
    sem_current_table = sem_global_table;
+
+   sem_current_context = sem_ctx_global;
 
    sem_context_stack = stack_get();
 }
@@ -49,6 +77,7 @@ sem_table* sem_table_get(void)
 
 void sem_table_dispose(sem_table* table)
 {
+   /* TODO: Does not free all allocated memory for the nodes */
    btree_dispose(table->table);
    stack_dispose(table->pending_stack);
    sem_entry_dispose(table->pending_changes);
@@ -169,4 +198,25 @@ void sem_error(sem_error_type error)
    }
 }
 
+void sem_context_change(sem_scope_chg_type type)
+{
+   switch(type)
+   {
+      case: sem_scope_global_to_local:
+         sem_table_dispose(sem_local_table);
+         sem_local_table = sem_table_get();
+
+         int i;
+         for(i = 0; i < sem_global_table->pending_changes->num_param; ++i)
+         {
+            sem_entry* entry = sem_entry_get();
+
+            entry->string =
+
+            sem_pending_insert(sem_local_table,
+         }
+         break;
+
+   }
+}
 

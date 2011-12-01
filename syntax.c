@@ -178,15 +178,7 @@ int programa()
 
    CHECK_STRING(tk, "algoritmo");
 
-
-
-   /* TODO: mudar contexto
-
-      FAZER FUNCAO DE "SUBIR" e "DESCER" contexto
-      ao subir contexto, empilhar
-      ao descer, passar um argumento se deve apagar o more_info
-
-   */
+   sem_context_change(sem_scope_global_to_local);
 
    tk = get_token();
 
@@ -228,7 +220,9 @@ int declaracao_local()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
-      CHECK_SEM(sem_pending_insert(tk->string, constant), 0);
+
+      CHECK_SEM(sem_pending_insert(tk->string, constant), sem_error_ident_ja_declarado);
+
       tk = get_token();
 
       CHECK_STRING(tk, ":");
@@ -286,7 +280,7 @@ int variavel()
 	{
 		CHECK_CLASS(tk, identifier);
 
-      CHECK_SEM(sem_pending_insert(tk->string, variable), 0);   /* TODO: correct-me */
+      CHECK_SEM(sem_pending_insert(tk->string, variable), sem_error_ident_ja_declarado);
 
       tk = get_token();
 
@@ -453,10 +447,13 @@ int declaracao_global()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
+      CHECK_SEM(sem_pending_insert(tk->string, procedure), sem_error_ident_ja_declarado);
       tk = get_token();
 
       CHECK_STRING(tk, "(");
       tk = get_token();
+
+      sem_context_change(sem_ctx_proc_func_declaration);
 
       if ( search_first(tk, parametro_firsts) == SUCCESS )
       {

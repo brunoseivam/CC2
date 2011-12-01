@@ -7,6 +7,7 @@
 
 #include "datastruc/btree.h"
 #include "datastruc/stack.h"
+#include "datastruc/list.h"
 #include "common.h"
 
 #define  SEM_BTREE_ORDER            5
@@ -31,12 +32,19 @@ typedef enum sem_pending_upd_type
 
 }sem_pending_upd_type;
 
-typedef enum sem_ctx_chg_type /* Semantic context change type */
+typedef enum sem_scope_chg_type /* Semantic context change type */
 {
-   sem_ctx_global_to_local = 1,
-   sem_ctx_local_to_global,
-   sem_ctx_proc_func_declaration,
-   sem_ctx_register
+   sem_scope_global_to_local = 1,
+   sem_scope_local_to_global,
+   sem_scope_proc_func_declaration,
+   sem_scope_register
+}
+
+typedef enum sem_ctx_type        /* Current context type */
+{
+   sem_ctx_global = 1,
+   sem_ctx_local,
+   sem_ctx_param
 }
 
 typedef enum sem_error_type
@@ -74,6 +82,8 @@ sem_table*  sem_current_table;
 
 stack*      sem_context_stack;
 
+sem_ctx_type   sem_current_context;
+
 
 void        sem_error         (int error_code);
 int         sem_compare_keys  (const void* key1, const void* key2);
@@ -81,6 +91,7 @@ int         sem_compare_keys  (const void* key1, const void* key2);
 void        sem_init          (void);
 
 sem_entry*  sem_entry_get     (void);
+sem_entry*  sem_entry_clone   (sem_entry* entry);
 void        sem_entry_dispose (sem_entry* entry);
 
 sem_table*  sem_table_get     (void);
@@ -94,7 +105,7 @@ void        sem_table_dispose (sem_table* table);
 int         sem_pending_insert   (char* string, sem_category category);
 void        sem_pending_update   (sem_pending_upd_type upd, void* value);
 void        sem_pending_commit   (void);
-void        sem_scope_change     (void);
+void        sem_context_change   (sem_scope_chg_type type);
 
 
 #endif
