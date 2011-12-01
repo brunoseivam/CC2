@@ -12,6 +12,6 @@ typedef struct list
 list*    list_get       (void);
 void     list_dispose   (list* l);
 void     list_insert    (list* l, void* value);
-void*    list_find      (list* l);
+void*    list_elem_at   (list* l, int position);
 
 #endif

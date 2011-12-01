@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #include "syntax.h"
-#include "generator.h"
 
 
 /* Caso a estrutura first contenha apenas uma string OU
@@ -182,14 +181,6 @@ int programa()
    sem_context_change(sem_scope_global_to_local);
    gen_main_begin();
 
-   /* TODO: mudar contexto
-
-      FAZER FUNCAO DE "SUBIR" e "DESCER" contexto
-      ao subir contexto, empilhar
-      ao descer, passar um argumento se deve apagar o more_info
-
-   */
-
    tk = get_token();
 
    while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
@@ -198,7 +189,7 @@ int programa()
    CALL(comandos);
 
    CHECK_STRING(tk, "fim_algoritmo");
-   
+
    gen_main_end();
 
    tk = get_token();
@@ -233,7 +224,6 @@ int declaracao_local()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
-
       CHECK_SEM(sem_pending_insert(tk->string, constant), sem_error_ident_ja_declarado);
 
       tk = get_token();
@@ -251,7 +241,7 @@ int declaracao_local()
       /* TODO: checar os tipos, se correspondem */
       if( tk->class != string && tk->class != integer_number && tk->class != real_number)
          CHECK_STRINGS(tk, "verdadeiro", "falso");
-      
+
       gen_const(sem_current_table,tk->string);
 
       sem_pending_commit();
@@ -348,6 +338,7 @@ Autor: Bruno
 
 <outros_ident>                 ::= . IDENT <outros_ident> | epsilon
 */
+
 int outros_ident()
 {
    while( strcmp(tk->string, ".") == SUCCESS)
@@ -366,6 +357,7 @@ Autor: Bruno
 
 <dimensao>                     ::= [ <exp_aritmetica> ] <dimensao>| epsilon
 */
+
 int dimensao()
 {
    int ret;
@@ -388,13 +380,17 @@ Autor: Bruno
 
 <mais_variaveis>                    ::= <variavel> <mais_variaveis> | epsilon
 */
+
 int tipo()
 {
    int ret;
    if( strcmp(tk->string, "registro") == SUCCESS)
    {
       tk = get_token();
-      /* TODO: trocar de contexto */
+
+      sem_pending_update(sem_upd_type, "typedef");
+      sem_context_change(sem_scope_register);
+
       do
       {
          CALL(variavel);
@@ -402,6 +398,8 @@ int tipo()
 
       CHECK_STRING(tk, "fim_registro");
       tk = get_token();
+
+      sem_context_change(sem_scope_register_end);
    }
    else
    {
@@ -471,7 +469,7 @@ int declaracao_global()
       CHECK_STRING(tk, "(");
       tk = get_token();
 
-      sem_context_change(sem_ctx_proc_func_declaration);
+      sem_context_change(sem_scope_param);
 
       if ( search_first(tk, parametro_firsts) == SUCCESS )
       {
@@ -481,6 +479,7 @@ int declaracao_global()
 
       CHECK_STRING(tk, ")");
       tk = get_token();
+
 
       while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
       	CALL(declaracao_local);
@@ -496,6 +495,8 @@ int declaracao_global()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
+      CHECK_SEM(sem_pending_insert(tk->string, function), sem_error_ident_ja_declarado);
+
       tk = get_token();
 
       CHECK_STRING(tk, "(");

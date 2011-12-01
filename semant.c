@@ -77,6 +77,7 @@ sem_table* sem_table_get(void)
 
 void sem_table_dispose(sem_table* table)
 {
+   if(!table) return;
    /* TODO: Does not free all allocated memory for the nodes */
    btree_dispose(table->table);
    stack_dispose(table->pending_stack);
@@ -199,21 +200,50 @@ void sem_error(sem_error_type error)
 
 void sem_context_change(sem_scope_chg_type type)
 {
+   static sem_table* last_context = NULL;
+
    switch(type)
    {
-      case: sem_scope_global_to_local:
-         sem_table_dispose(sem_local_table);
+      case sem_scope_global_to_local:
+
          sem_local_table = sem_table_get();
 
+         /* Insere os parâmetros da funcao/procedimento na tabela local */
          int i;
          for(i = 0; i < sem_global_table->pending_changes->num_param; ++i)
          {
-            sem_entry* entry = sem_entry_get();
-
-            entry->string =
-
-            sem_pending_insert(sem_local_table,
+            sem_entry* entry = sem_entry_clone(list_elem_at(((list*) sem_global_table->pending_changes->more_info), i));
+            sem_table_insert(sem_local_table, entry);
          }
+         sem_current_table = sem_local_table;
+         break;
+
+      case sem_scope_local_to_global:
+         sem_table_dispose(sem_local_table);
+         sem_local_table = NULL;
+
+         sem_current_table = sem_global_table;
+
+         break;
+
+      case sem_scope_register:
+         sem_current_table->pending_changes->more_info = (void*) sem_table_get();
+
+         if(!stack_peek(sem_context_stack))     /* Empty stack */
+            last_context = sem_current_table;
+
+         stack_push(sem_context_stack, sem_current_table->pending_changes->more_info);
+
+
+         sem_current_table = stack_peek(sem_context_stack);
+         break;
+
+      case sem_scope_register_end:
+         stack_pop(sem_context_stack);
+
+         if(! (sem_current_table = stack_peek(sem_context_stack)) );
+            sem_current_table = last_context;
+
          break;
 
    }

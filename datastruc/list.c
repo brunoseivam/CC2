@@ -4,7 +4,7 @@ list*   list_get      (void)
 {
    list* l     = (list*) malloc(sizeof(list));
    l->elements = NULL;
-   l->size     = 0
+   l->size     = 0;
 
    return l;
 }

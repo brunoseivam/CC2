@@ -36,16 +36,18 @@ typedef enum sem_scope_chg_type /* Semantic context change type */
 {
    sem_scope_global_to_local = 1,
    sem_scope_local_to_global,
-   sem_scope_proc_func_declaration,
-   sem_scope_register
-}
+   sem_scope_param,
+   sem_scope_param_to_local,
+   sem_scope_register,
+   sem_scope_register_end
+}sem_scope_chg_type;
 
 typedef enum sem_ctx_type        /* Current context type */
 {
    sem_ctx_global = 1,
    sem_ctx_local,
    sem_ctx_param
-}
+}sem_ctx_type;
 
 typedef enum sem_error_type
 {
@@ -55,7 +57,7 @@ typedef enum sem_error_type
    sem_error_incomp_de_parametros,
    sem_error_atrib_nao_compativel,
    sem_error_retorne_nao_permitido
-}
+}sem_error_type;
 
 typedef struct sem_entry
 {
@@ -85,7 +87,7 @@ stack*      sem_context_stack;
 sem_ctx_type   sem_current_context;
 
 
-void        sem_error         (int error_code);
+void        sem_error         (sem_error_type error);
 int         sem_compare_keys  (const void* key1, const void* key2);
 
 void        sem_init          (void);
