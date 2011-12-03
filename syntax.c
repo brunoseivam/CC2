@@ -253,7 +253,8 @@ int declaracao_local()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
-      CHECK_SEM(sem_pending_insert(tk->string, type_def), 0);
+      CHECK_SEM(sem_pending_insert(tk->string, type_def), sem_error_ident_ja_declarado);
+
       tk = get_token();
 
       CHECK_STRING(tk, ":");
@@ -261,6 +262,9 @@ int declaracao_local()
 
       /* TODO: mudar contexto */
       CALL(tipo);
+      /* Necessario dar commit ???
+         sem_pending_commit();*/
+
    }
    else
    {
@@ -302,7 +306,7 @@ int variavel()
 
    CALL(tipo);
 
-   gen_variable(sem_current_table);
+   /*gen_variable(sem_current_table);*/
 
    sem_pending_commit();
 
@@ -427,7 +431,7 @@ int tipo_estendido()
 {
    if ( strcmp(tk->string, "^") == SUCCESS )
    {
-      sem_pending_update(sem_upd_is_pointer, (void*) 1);
+      sem_pending_update(sem_upd_pointer, (void*) 1);
       tk = get_token();
    }
 
@@ -472,8 +476,6 @@ int declaracao_global()
       CHECK_STRING(tk, "(");
       tk = get_token();
 
-      sem_context_change(sem_scope_param);
-
       if ( search_first(tk, parametro_firsts) == SUCCESS )
       {
          CALL(parametro);
@@ -481,6 +483,9 @@ int declaracao_global()
 
       CHECK_STRING(tk, ")");
       tk = get_token();
+
+      sem_pending_commit();
+      sem_context_change(sem_scope_global_to_local);
 
 
       while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
@@ -490,6 +495,8 @@ int declaracao_global()
 
       CHECK_STRING(tk, "fim_procedimento");
       tk = get_token();
+
+      sem_context_change(sem_scope_local_to_global);
 
    }
    else if ( strcmp(tk->string, "funcao") == SUCCESS )
@@ -510,10 +517,15 @@ int declaracao_global()
       CHECK_STRING(tk, ")");
       tk = get_token();
 
+
+
       CHECK_STRING(tk, ":");
       tk = get_token();
 
       CALL(tipo_estendido);
+
+      sem_pending_commit();
+      sem_context_change(sem_scope_global_to_local);
 
       while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
 	      CALL(declaracao_local);
@@ -522,6 +534,8 @@ int declaracao_global()
 
       CHECK_STRING(tk, "fim_funcao");
       tk = get_token();
+
+      sem_context_change(sem_scope_local_to_global);
    }
 
    return SUCCESS;
@@ -550,41 +564,34 @@ int parametro()
    while(1)
    {
       if ( strcmp(tk->string, "var") == SUCCESS )
+      {
+         sem_pending_update(sem_upd_type, (void*) sem_pt_type_var);
          tk = get_token();
+      }
 
-      /*
-      Substituição do código do autômato identificador()
-
-      CALL(identificador);*/
-
-      if( strcmp(tk->string, "^") == SUCCESS)
-         tk = get_token();
-
-      CHECK_CLASS(tk, identifier);
-      tk = get_token();
-
-      CALL(outros_ident);  /* veementemente ignorado */
-      CALL(dimensao);
-
-      /* Fim da substituição */
-
-      while( strcmp(tk->string, ",") == SUCCESS)
+      /* TODO: otimizar? */
+      while(1)
    	{
-      	tk = get_token();
-
-      	/* Outra substituição de identificador()
+      	/* Substituição de identificador()
       	CALL(identificador);
       	*/
 
       	if( strcmp(tk->string, "^") == SUCCESS)
+      	{
+      	   sem_pending_update(sem_upd_type, (void*)sem_pt_type_pointer);
             tk = get_token();
+      	}
 
          CHECK_CLASS(tk, identifier);
+         sem_pending_update(sem_upd_param_insert, tk->string);
          tk = get_token();
 
          CALL(outros_ident);  /* veementemente ignorado */
          CALL(dimensao);
          /* Fim da substituição */
+
+         if(strcmp(tk->string, ",") != SUCCESS) break;
+         tk = get_token();
    	}
 
       CHECK_STRING(tk, ":");
@@ -592,13 +599,11 @@ int parametro()
 
       CALL(tipo_estendido);
 
+      sem_pending_update(sem_upd_param_update, NULL);
 
-
-
-      if ( strcmp(tk->string, ",") != SUCCESS )
-         break;
-
+      if ( strcmp(tk->string, ",") != SUCCESS ) break;
       tk = get_token();
+
    }
 
    return SUCCESS;

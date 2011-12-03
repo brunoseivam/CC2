@@ -1,4 +1,5 @@
 #include "list.h"
+#include <stdio.h>
 
 list*   list_get      (void)
 {
@@ -17,10 +18,12 @@ void     list_dispose   (list* l)
 
 void     list_insert    (list* l, void* value)
 {
+   //printf("inserindo elemento...\n");
    ++l->size;
-   l->elements = (void*) realloc(l->elements, l->size*sizeof(void*));
+   l->elements = (void**) realloc(l->elements, l->size*sizeof(void*));
 
    l->elements[l->size-1] = value;
+   //printf("tamanho lista %d, elemento %s\n", l->size, ((sem_entry*)l->elements[size-1])->string);
 }
 
 void*    list_elem_at   (list* l, int position)

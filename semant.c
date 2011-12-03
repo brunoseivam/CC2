@@ -12,7 +12,7 @@ sem_entry* sem_entry_get(void)
    entry->string     = NULL;
    entry->category   = 0;
    entry->type       = NULL;
-   entry->is_pointer = 0;
+   entry->pointer    = sem_pt_type_none;
    entry->more_info  = NULL;
 
    return entry;
@@ -36,7 +36,7 @@ sem_entry* sem_entry_clone(sem_entry* entry)
       strcpy(new_entry->type,entry->type);
    }
 
-   new_entry->is_pointer = entry->is_pointer;
+   new_entry->pointer    = entry->pointer;
 
    new_entry->more_info  = entry->more_info;    /* Aqui NAO será um clone */
 
@@ -56,8 +56,6 @@ void sem_init(void)
 {
    sem_global_table  = sem_table_get();
    sem_current_table = sem_global_table;
-
-   sem_current_context = sem_ctx_global;
 
    sem_context_stack = stack_get();
 }
@@ -106,6 +104,9 @@ int sem_pending_insert(char* string, sem_category category)
 
    partial_entry->category = category;
 
+   if(category == procedure || category == function)
+      sem_current_table->pending_changes->more_info = (void*) list_get();
+
    /* TODO: pensar: precisa mesmo desse wrapper? */
    if(sem_table_insert(sem_current_table, partial_entry) != SUCCESS)
       return ERROR;
@@ -118,6 +119,10 @@ int sem_pending_insert(char* string, sem_category category)
 
 void sem_pending_update(sem_pending_upd_type upd, void* value)
 {
+   sem_entry*  temp_entry;
+   list*       temp_list;
+
+   int i;
    switch(upd)
    {
       case sem_upd_type:
@@ -127,13 +132,55 @@ void sem_pending_update(sem_pending_upd_type upd, void* value)
          strcpy(sem_current_table->pending_changes->type, (char*)value);
          break;
 
-      case sem_upd_is_pointer:
-         sem_current_table->pending_changes->is_pointer = (int) value;
+      case sem_upd_pointer:
+      /* Nota: none deve ser 0
+               var deve ser 01 ou 10
+               pointer deve ser 10 ou 01
+               var e pointer deve ser 11
+      */
+         sem_current_table->pending_changes->pointer |= (sem_pt_type) value;
          break;
 
-      /* TODO: completar */
       case sem_upd_more_info:
          sem_current_table->pending_changes->more_info = value;
+         break;
+
+      case sem_upd_param_insert:
+         temp_entry = sem_entry_get();
+
+         temp_entry->string = (char*) malloc((1+strlen((char*) value))*sizeof(char));
+         strcpy(temp_entry->string, (char*) value);
+         temp_entry->category = variable;
+
+         temp_list = (list*) sem_current_table->pending_changes->more_info;
+
+         printf("antes de inserir\n");
+         list_insert(temp_list, (void*) temp_entry);
+         printf("depois de inserir %d\n", temp_list->size);
+
+
+         break;
+
+      case sem_upd_param_update:
+         temp_list = (list*)sem_current_table->pending_changes->more_info;
+
+         for(i = temp_list->size - 1;
+             (temp_entry = ((sem_entry*) list_elem_at(temp_list, i))) &&
+             temp_entry->type == NULL;
+             --i)
+         {
+            int type_len = (1+strlen((char*) sem_current_table->pending_changes->type));
+
+            temp_entry->pointer = sem_current_table->pending_changes->pointer;
+            temp_entry->type    = (char*) malloc(type_len*sizeof(char));
+
+            strcpy(temp_entry->type, (char*)sem_current_table->pending_changes->type);
+
+            sem_current_table->pending_changes->pointer = sem_pt_type_none;
+            free(sem_current_table->pending_changes->type);
+            sem_current_table->pending_changes->type = NULL;
+
+         }
          break;
 
 
@@ -148,7 +195,7 @@ void sem_pending_commit(void)
    sem_entry* entry;
    while((entry = stack_pop(sem_current_table->pending_stack)))
    {
-      entry->is_pointer    = sem_current_table->pending_changes->is_pointer;
+      entry->pointer    = sem_current_table->pending_changes->pointer;
 
       if(sem_current_table->pending_changes->type)
       {
@@ -197,23 +244,25 @@ void sem_error(sem_error_type error)
 void sem_context_change(sem_scope_chg_type type)
 {
    static sem_table* last_context = NULL;
-   sem_table* t = NULL;
+   sem_table*        t            = NULL;
+   int i;
 
    switch(type)
    {
-      /*case sem_scope_global_to_local:
+      case sem_scope_global_to_local:
 
          sem_local_table = sem_table_get();
 
-         /* Insere os parâmetros da funcao/procedimento na tabela local
-         int i;
-         for(i = 0; i < sem_global_table->pending_changes->num_param; ++i)
+         /* Insere os parâmetros da funcao/procedimento na tabela local */
+         for(i = 0;
+             i < ((list*) sem_global_table->pending_changes->more_info)->size;
+             ++i)
          {
             sem_entry* entry = sem_entry_clone(list_elem_at(((list*) sem_global_table->pending_changes->more_info), i));
             sem_table_insert(sem_local_table, entry);
          }
          sem_current_table = sem_local_table;
-         break;*/
+         break;
 
       case sem_scope_local_to_global:
          sem_table_dispose(sem_local_table);
