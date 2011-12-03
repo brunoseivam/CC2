@@ -41,6 +41,6 @@ void*    stack_pop      (stack* s)
 }
 void*    stack_peek     (stack* s)
 {
-   if(!s->top) return NULL;
+   if(!(s->top)) return NULL;
    return s->top->value;
 }

@@ -46,7 +46,6 @@ void gen_const(sem_table* cur,char * value)
 /*Declaracao de variavel(is)*/
 void gen_variable(sem_table* cur)
 {
-
     stack* temp_stack = stack_get();
     sem_entry* temp_sem_entry;
 
@@ -86,6 +85,6 @@ void gen_variable(sem_table* cur)
 
      /* Libera stack temporaria*/
      stack_dispose(temp_stack);
- 
+
 
 }

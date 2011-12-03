@@ -12,7 +12,7 @@ list*   list_get      (void)
 void     list_dispose   (list* l)
 {
    free(l->elements);
-   free(l); /* TODO: ?? */
+   free(l);
 }
 
 void     list_insert    (list* l, void* value)
@@ -23,7 +23,7 @@ void     list_insert    (list* l, void* value)
    l->elements[l->size-1] = value;
 }
 
-void*    list_elem_at    (list* l, int position)
+void*    list_elem_at   (list* l, int position)
 {
    if(0 <= position && position < l->size)
       return l->elements[position];

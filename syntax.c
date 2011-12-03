@@ -386,10 +386,11 @@ int tipo()
    int ret;
    if( strcmp(tk->string, "registro") == SUCCESS)
    {
-      tk = get_token();
 
-      sem_pending_update(sem_upd_type, "typedef");
+      sem_pending_update(sem_upd_type, tk->string);
       sem_context_change(sem_scope_register);
+
+      tk = get_token();
 
       do
       {
@@ -399,7 +400,9 @@ int tipo()
       CHECK_STRING(tk, "fim_registro");
       tk = get_token();
 
+
       sem_context_change(sem_scope_register_end);
+      sem_pending_commit();
    }
    else
    {
@@ -474,7 +477,6 @@ int declaracao_global()
       if ( search_first(tk, parametro_firsts) == SUCCESS )
       {
          CALL(parametro);
-         /*++num_param;*/
       }
 
       CHECK_STRING(tk, ")");
@@ -536,6 +538,9 @@ Autor: Talita
 <mais_parametros> ::= , <parametro> | epsilon
 <mais_ident>                   ::= , <identificador> <mais_ident> | epsilon
 
+<identificador>                 ::= ^ IDENT <outros_ident> <dimensao>
+                                 |  IDENT <outros_ident> <dimensao>
+
 */
 
 int parametro()
@@ -547,18 +552,48 @@ int parametro()
       if ( strcmp(tk->string, "var") == SUCCESS )
          tk = get_token();
 
-      CALL(identificador);
+      /*
+      Substituição do código do autômato identificador()
+
+      CALL(identificador);*/
+
+      if( strcmp(tk->string, "^") == SUCCESS)
+         tk = get_token();
+
+      CHECK_CLASS(tk, identifier);
+      tk = get_token();
+
+      CALL(outros_ident);  /* veementemente ignorado */
+      CALL(dimensao);
+
+      /* Fim da substituição */
 
       while( strcmp(tk->string, ",") == SUCCESS)
    	{
       	tk = get_token();
+
+      	/* Outra substituição de identificador()
       	CALL(identificador);
+      	*/
+
+      	if( strcmp(tk->string, "^") == SUCCESS)
+            tk = get_token();
+
+         CHECK_CLASS(tk, identifier);
+         tk = get_token();
+
+         CALL(outros_ident);  /* veementemente ignorado */
+         CALL(dimensao);
+         /* Fim da substituição */
    	}
 
       CHECK_STRING(tk, ":");
       tk = get_token();
 
       CALL(tipo_estendido);
+
+
+
 
       if ( strcmp(tk->string, ",") != SUCCESS )
          break;

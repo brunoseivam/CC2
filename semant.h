@@ -27,7 +27,6 @@ typedef enum sem_pending_upd_type
 {
    sem_upd_type = 1,
    sem_upd_is_pointer,
-   sem_upd_num_param,
    sem_upd_more_info
 
 }sem_pending_upd_type;
@@ -64,7 +63,6 @@ typedef struct sem_entry
    char*          string;
    sem_category   category;
    char*          type;
-   int            num_param;
    int            is_pointer;
    void*          more_info;
 }sem_entry;

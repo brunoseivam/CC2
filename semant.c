@@ -12,7 +12,6 @@ sem_entry* sem_entry_get(void)
    entry->string     = NULL;
    entry->category   = 0;
    entry->type       = NULL;
-   entry->num_param  = 0;
    entry->is_pointer = 0;
    entry->more_info  = NULL;
 
@@ -37,7 +36,6 @@ sem_entry* sem_entry_clone(sem_entry* entry)
       strcpy(new_entry->type,entry->type);
    }
 
-   new_entry->num_param  = entry->num_param;
    new_entry->is_pointer = entry->is_pointer;
 
    new_entry->more_info  = entry->more_info;    /* Aqui NAO será um clone */
@@ -135,10 +133,9 @@ void sem_pending_update(sem_pending_upd_type upd, void* value)
 
       /* TODO: completar */
       case sem_upd_more_info:
+         sem_current_table->pending_changes->more_info = value;
          break;
 
-      case sem_upd_num_param:
-         break;
 
       default:
          break;
@@ -152,7 +149,6 @@ void sem_pending_commit(void)
    while((entry = stack_pop(sem_current_table->pending_stack)))
    {
       entry->is_pointer    = sem_current_table->pending_changes->is_pointer;
-      entry->num_param     = sem_current_table->pending_changes->num_param;
 
       if(sem_current_table->pending_changes->type)
       {
@@ -201,14 +197,15 @@ void sem_error(sem_error_type error)
 void sem_context_change(sem_scope_chg_type type)
 {
    static sem_table* last_context = NULL;
+   sem_table* t = NULL;
 
    switch(type)
    {
-      case sem_scope_global_to_local:
+      /*case sem_scope_global_to_local:
 
          sem_local_table = sem_table_get();
 
-         /* Insere os parâmetros da funcao/procedimento na tabela local */
+         /* Insere os parâmetros da funcao/procedimento na tabela local
          int i;
          for(i = 0; i < sem_global_table->pending_changes->num_param; ++i)
          {
@@ -216,7 +213,7 @@ void sem_context_change(sem_scope_chg_type type)
             sem_table_insert(sem_local_table, entry);
          }
          sem_current_table = sem_local_table;
-         break;
+         break;*/
 
       case sem_scope_local_to_global:
          sem_table_dispose(sem_local_table);
@@ -227,21 +224,24 @@ void sem_context_change(sem_scope_chg_type type)
          break;
 
       case sem_scope_register:
-         sem_current_table->pending_changes->more_info = (void*) sem_table_get();
+
+         t = sem_table_get();
+         sem_pending_update(sem_upd_more_info, t);
+
+         /*sem_current_table->pending_changes->more_info = (void*) sem_table_get();*/
 
          if(!stack_peek(sem_context_stack))     /* Empty stack */
             last_context = sem_current_table;
 
-         stack_push(sem_context_stack, sem_current_table->pending_changes->more_info);
+         stack_push(sem_context_stack, t);
 
-
-         sem_current_table = stack_peek(sem_context_stack);
+         sem_current_table = (sem_table*) stack_peek(sem_context_stack);
          break;
 
       case sem_scope_register_end:
          stack_pop(sem_context_stack);
 
-         if(! (sem_current_table = stack_peek(sem_context_stack)) );
+         if(! (sem_current_table = (sem_table*) stack_peek(sem_context_stack)) )
             sem_current_table = last_context;
 
          break;
