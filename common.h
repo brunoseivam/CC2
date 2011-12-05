@@ -20,7 +20,6 @@
 #define  COMMENTERROR      -2    /* Comentário não fechado */
 #define  SYNTAXERROR       -3    /* Erro de sintaxe */
 
-#define  NEW(var, type)    type* var = (type*) malloc(sizeof(type))
 
 typedef enum token_class
 {

@@ -64,17 +64,5 @@ int main(int argc, char** argv)
    close_files();                      /* Fecha os arquivos abertos */
 
 
-   btree_print(sem_current_table->table, print_value);
-
-   sem_entry* entry = (sem_entry*) btree_find(sem_current_table->table, "tVinho");
-   printf("%s %s\n", entry->string, entry->type);
-
-   btree_print(((sem_table*) entry->more_info)->table, print_value);
-
-   sem_entry* entry2 = (sem_entry*) btree_find(((sem_table*)entry->more_info)->table, "b");
-   printf("%s %s\n", entry2->string, entry2->type);
-
-   btree_print(((sem_table*) entry2->more_info)->table, print_value);
-
    return 0;
 }

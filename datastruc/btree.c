@@ -73,7 +73,19 @@ static struct btreei_node* btreei_get_node(int order)
 
 static void btreei_dispose_node(struct btreei_node* n)
 {
-   free(n);    /* TODO: ??? */
+   /*
+   int i;
+   if(!btreei_is_leaf(n))
+      for(i = 0; i <= n->length; i++)
+      {
+         btreei_dispose_node(n->pointers[i]);
+         n->pointers[i] = NULL;
+      }
+
+   dispose(n->values[i]);
+   n->keys[i] = NULL;
+   n->values[i] = NULL;*/
+   free(n);
 }
 
 static int btreei_is_leaf(struct btreei_node* n)
@@ -364,7 +376,7 @@ void btreei_print(struct btreei_node* n, int level, void (*print_key_value)(cons
 
 
 
-btree* btree_get_tree(int order, int (*compare)(const void*, const void*))
+btree* btree_get_tree(int order, int (*compare)(const void*, const void*), void (*dispose)(void*))
 {
    btree* t = (btree*) malloc(sizeof(btree));
 
@@ -372,12 +384,16 @@ btree* btree_get_tree(int order, int (*compare)(const void*, const void*))
    t->order = order;
 
    t->compare = compare;
+   t->dispose = dispose;
 
    return t;
 }
 
 void btree_dispose(btree* tree)
 {
+   /*btreei_dispose_node(tree->root);*/
+
+
    free(tree);    /* TODO: ?? */
 }
 

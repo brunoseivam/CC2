@@ -1,4 +1,5 @@
 #include "stack.h"
+#include <stdio.h>
 
 struct stacki_node
 {
@@ -43,4 +44,14 @@ void*    stack_peek     (stack* s)
 {
    if(!(s->top)) return NULL;
    return s->top->value;
+}
+
+void stack_print(stack* s)
+{
+   struct stacki_node* n = s->top;
+   while(n)
+   {
+      printf("stack: %s\n", (char*) n->value);
+      n = n->next;
+   }
 }

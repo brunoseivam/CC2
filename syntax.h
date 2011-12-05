@@ -67,12 +67,12 @@
                                     if(!count) return SYNTAXERROR;                        \
                                  }while(0)
 
-#define  CHECK_SEM(func, code)   do{                                                      \
-                                    if(func != BTREE_SUCCESS)                                   \
-                                    {                                                     \
-                                       sem_error(code);                                   \
-                                    }                                                     \
-                                 }while(0)
+#define  SEM_TRY(func, code, str)   do{                                                   \
+                                       if(func != SUCCESS)                                \
+                                       {                                                  \
+                                          sem_error(code, str);                           \
+                                       }                                                  \
+                                    }while(0)
 
 /* Protótipos */
 
@@ -175,5 +175,7 @@ int expressao();
 int termo_logico();
 int outros_termos_logicos();
 int outros_fatores_logicos();
+
+int identificador_novo();
 
 #endif

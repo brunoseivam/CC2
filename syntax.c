@@ -224,7 +224,7 @@ int declaracao_local()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
-      CHECK_SEM(sem_pending_insert(tk->string, constant), sem_error_ident_ja_declarado);
+      SEM_TRY(sem_pending_insert(tk->string, constant), sem_error_ident_ja_declarado, tk->string);
 
       tk = get_token();
 
@@ -242,7 +242,7 @@ int declaracao_local()
       if( tk->class != string && tk->class != integer_number && tk->class != real_number)
          CHECK_STRINGS(tk, "verdadeiro", "falso");
 
-      gen_const(sem_current_table,tk->string);
+      gen_const(sem_gl_info.current_table,tk->string);
 
       sem_pending_commit();
 
@@ -253,7 +253,7 @@ int declaracao_local()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
-      CHECK_SEM(sem_pending_insert(tk->string, type_def), sem_error_ident_ja_declarado);
+      SEM_TRY(sem_pending_insert(tk->string, type_def), sem_error_ident_ja_declarado, tk->string);
 
       tk = get_token();
 
@@ -290,7 +290,7 @@ int variavel()
 	{
 		CHECK_CLASS(tk, identifier);
 
-      CHECK_SEM(sem_pending_insert(tk->string, variable), sem_error_ident_ja_declarado);
+      SEM_TRY(sem_pending_insert(tk->string, variable), sem_error_ident_ja_declarado, tk->string);
 
       tk = get_token();
 
@@ -306,7 +306,7 @@ int variavel()
 
    CALL(tipo);
 
-   /*gen_variable(sem_current_table);*/
+   /*gen_variable(sem_gl_info.current_table);*/
 
    sem_pending_commit();
 
@@ -319,7 +319,7 @@ Autor: Bruno
 
 <identificador>                 ::= ^ IDENT <outros_ident> <dimensao>
                                  |  IDENT <outros_ident> <dimensao>
-*/
+*
 int identificador()
 {
    int ret;
@@ -328,13 +328,15 @@ int identificador()
       tk = get_token();
 
    CHECK_CLASS(tk, identifier);
+   SEM_TRY(sem_check(sem_check_var_const_declared
+
    tk = get_token();
 
    CALL(outros_ident);
    CALL(dimensao);
 
    return SUCCESS;
-}
+}*/
 /*
 
 Automato 5
@@ -343,15 +345,30 @@ Autor: Bruno
 <outros_ident>                 ::= . IDENT <outros_ident> | epsilon
 */
 
+
 int outros_ident()
 {
+   int scope_changes = 0;
+
    while( strcmp(tk->string, ".") == SUCCESS)
    {
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
+
+      sem_register_ident_append(tk->string);
+      SEM_TRY(sem_check(sem_check_variable_declared, tk->string), sem_error_ident_nao_declarado, sem_gl_info.register_ident);
+
+      sem_attrib_set(sem_type_of(tk->string));
+
+      sem_context_change(sem_scope_register_query);
+      ++scope_changes;
+
       tk = get_token();
    }
+
+   while(scope_changes--)
+      sem_context_change(sem_scope_register_end);
 
    return SUCCESS;
 }
@@ -392,7 +409,7 @@ int tipo()
    {
 
       sem_pending_update(sem_upd_type, tk->string);
-      sem_context_change(sem_scope_register);
+      sem_context_change(sem_scope_register_insert);
 
       tk = get_token();
 
@@ -431,18 +448,18 @@ int tipo_estendido()
 {
    if ( strcmp(tk->string, "^") == SUCCESS )
    {
-      sem_pending_update(sem_upd_pointer, (void*) 1);
+      sem_pending_update(sem_upd_pointer, (void*) sem_pt_type_pointer);
       tk = get_token();
    }
 
-   if ( tk->class != identifier )
+   if ( tk->class == identifier )
+   {
+      SEM_TRY(sem_check(sem_check_type_declared, tk->string), sem_error_tipo_nao_declarado, tk->string);
+   }
+   else
    {
       CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
-   }
-   /*else
-	{ MUDAR ORDEM IF ELSE
-       TODO: buscar tipo, ver se existe
-	}*/
+	}
 	sem_pending_update(sem_upd_type, (void*) tk->string);
    tk = get_token();
 
@@ -470,7 +487,7 @@ int declaracao_global()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
-      CHECK_SEM(sem_pending_insert(tk->string, procedure), sem_error_ident_ja_declarado);
+      SEM_TRY(sem_pending_insert(tk->string, procedure), sem_error_ident_ja_declarado, tk->string);
       tk = get_token();
 
       CHECK_STRING(tk, "(");
@@ -501,10 +518,11 @@ int declaracao_global()
    }
    else if ( strcmp(tk->string, "funcao") == SUCCESS )
    {
+      sem_context_change(sem_scope_allows_return);
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
-      CHECK_SEM(sem_pending_insert(tk->string, function), sem_error_ident_ja_declarado);
+      SEM_TRY(sem_pending_insert(tk->string, function), sem_error_ident_ja_declarado, tk->string);
 
       tk = get_token();
 
@@ -536,6 +554,7 @@ int declaracao_global()
       tk = get_token();
 
       sem_context_change(sem_scope_local_to_global);
+      sem_context_change(sem_scope_forbids_return);
    }
 
    return SUCCESS;
@@ -685,15 +704,32 @@ int cmd_leia()
    tk = get_token();
 
    CHECK_STRING(tk, "(");
-   tk = get_token();
 
-   CALL(identificador);
-
-   while( strcmp(tk->string, ",") == SUCCESS)
+   do
    {
       tk = get_token();
-      CALL(identificador);
-   }
+      /*CALL(identificador); substituição */
+      if( strcmp(tk->string, "^") == SUCCESS)
+         tk = get_token();
+
+      CALL(identificador_novo);
+      /*
+      CHECK_CLASS(tk, identifier);
+
+      sem_gl_info.register_ident_append(tk->string);
+      SEM_TRY(sem_check(sem_check_variable_declared, tk->string), sem_error_ident_nao_declarado, sem_gl_info.register_ident);
+      sem_context_change(sem_scope_register_query);
+      tk = get_token();
+
+      CALL(outros_ident);
+
+      sem_context_change(sem_scope_register_end);
+      sem_gl_info.register_ident_clear();
+
+      CALL(dimensao);
+      */
+
+   }while( strcmp(tk->string, ",") == SUCCESS);
 
    CHECK_STRING(tk, ")");
    tk = get_token();
@@ -819,6 +855,7 @@ int cmd_para()
    tk = get_token();
 
    CHECK_CLASS(tk, identifier);
+   SEM_TRY(sem_check(sem_check_variable_declared, tk->string), sem_error_ident_nao_declarado, tk->string);
    tk = get_token();
 
    CHECK_STRING(tk, "<-");
@@ -909,11 +946,13 @@ int cmd_pont_ident()
    CHECK_STRING(tk, "^");
    tk = get_token();
 
-   CHECK_CLASS(tk, identifier);
+   CALL(identificador_novo);
+
+   /*CHECK_CLASS(tk, identifier);
    tk = get_token();
 
    CALL(outros_ident);
-   CALL(dimensao);
+   CALL(dimensao);*/
 
    CHECK_STRING(tk, "<-");
    tk = get_token();
@@ -937,35 +976,66 @@ Autor: Lucas
 int cmd_ident()
 {
    int ret;
+   token* last_token;
+   token* cur_token;
 
    CHECK_CLASS(tk, identifier);
+
+   last_token           = (token*) malloc(sizeof(token));
+   last_token->string   = (char*) malloc((strlen(tk->string)+1)*sizeof(char));
+   last_token->class    = tk->class;
+   strcpy(last_token->string, tk->string);
+
    tk = get_token();
+
+   cur_token = tk;
 
    if( strcmp(tk->string, "(") == SUCCESS )
    {
-      tk = get_token();
-
-      CALL(expressao);
-
-      while(strcmp(tk->string, ",") == SUCCESS)
+      do
    	{
       	tk = get_token();
       	CALL(expressao);
-   	}
+   	}while(strcmp(tk->string, ",") == SUCCESS);
 
       CHECK_STRING(tk, ")");
       tk = get_token();
    }
    else
    {
+      while(stack_pop(sem_gl_info.attrib_stack));
+
+
+      printf("here----------------------------\n");
+
+      sem_register_ident_append(last_token->string);
+      SEM_TRY(sem_check(sem_check_variable_declared, last_token->string), sem_error_ident_nao_declarado, sem_gl_info.register_ident);
+
+      tk = last_token;
+      sem_context_change(sem_scope_register_query);
+      tk = cur_token;
+
+      sem_attrib_set(sem_type_of(last_token->string));
       CALL(outros_ident);
+
+      sem_context_change(sem_scope_register_end);
+      sem_attrib_push(NULL);
+      sem_register_ident_clear();
+
       CALL(dimensao);
+
+
 
       CHECK_STRING(tk, "<-");
       tk = get_token();
 
       CALL(expressao);
+
+      SEM_TRY(sem_check(sem_check_attr, NULL), sem_error_atrib_nao_compativel, last_token->string);
    }
+
+   free(last_token->string);
+   free(last_token);
 
    return SUCCESS;
 }
@@ -983,6 +1053,9 @@ int cmd_retorne()
    int ret;
 
    CHECK_STRING(tk, "retorne");
+
+   SEM_TRY(sem_check(sem_check_return_allowed, NULL), sem_error_retorne_nao_permitido, NULL);
+
    tk = get_token();
 
    CALL(expressao);
@@ -1083,6 +1156,8 @@ int exp_aritmetica()
    {
 	   tk = get_token();
 	   CALL(termo);
+
+	   sem_pop_check_push("inteiro");
    }
 
 	return SUCCESS;
@@ -1108,6 +1183,9 @@ int termo()
    {
       tk = get_token();
       CALL(fator);
+
+      sem_pop_check_push("inteiro");
+
    }
 
 	return SUCCESS;
@@ -1139,71 +1217,89 @@ int fator()
 {
    int ret;
 
-	while (1)
-	{
-		if( strcmp(tk->string, "&") == SUCCESS || tk->class == string )
-		{
-		   if(strcmp(tk->string,"&") == SUCCESS)
-		   {
-		       tk = get_token();
+   if( strcmp(tk->string, "&") == SUCCESS || tk->class == string )
+   {
+      if(strcmp(tk->string,"&") == SUCCESS)
+      {
+         sem_attrib_push("inteiro");
 
-		       CHECK_CLASS(tk,identifier);
-		       tk = get_token();
+          tk = get_token();
 
-		       CALL(outros_ident);
-		       CALL(dimensao);
-		   }
-		   else
-		   {
-		       tk = get_token();
-		   }
-		}
-		else
-		{
-		   if(strcmp(tk->string,"-") == SUCCESS)
-		      tk = get_token();
+          CALL(identificador_novo);
 
-		   if(strcmp(tk->string,"^") == SUCCESS)
-		   {
-		      tk = get_token();
+          /*CHECK_CLASS(tk,identifier);
+          tk = get_token();
 
-		      CHECK_CLASS(tk, identifier);
-		      tk = get_token();
+          CALL(outros_ident);
+          CALL(dimensao);*/
+      }
+      else
+      {
+         sem_attrib_push("literal");
+          tk = get_token();
+      }
+   }
+   else
+   {
+      if(strcmp(tk->string,"-") == SUCCESS)
+      {
+         tk = get_token();
+      }
 
-		      CALL(outros_ident);
-		      CALL(dimensao);
+      if(strcmp(tk->string,"^") == SUCCESS)
+      {
+         tk = get_token();
 
-		   }
-		   else if(tk->class == identifier)
-		   {
-		      tk = get_token();
-		      CALL(chamada_partes);
-		   }
-		   else if(tk->class == integer_number)
-		   {
-		      tk = get_token();
-		   }
-		   else if(tk->class == real_number)
-		   {
-		      tk = get_token();
-		   }
-		   else
-		   {
-		      CHECK_STRING(tk,"(");
-		      tk = get_token();
+         CALL(identificador_novo);
 
-		      CALL(expressao);
+         /*CHECK_CLASS(tk, identifier);
+         tk = get_token();
 
-		      CHECK_STRING(tk,")");
-		      tk = get_token();
-		   }
-		}
+         CALL(outros_ident);
+         CALL(dimensao);*/
 
-		if(strcmp(tk->string,"%") != SUCCESS)
-			break;
+      }
+      else if(tk->class == identifier)
+      {
+         /* Possivel fonte de problemas */
+         SEM_TRY(sem_check(sem_check_any_declared, tk->string), sem_error_ident_nao_declarado, tk->string);
+         sem_attrib_push(sem_type_of(tk->string));
 
-		tk = get_token();
-	}
+
+         tk = get_token();
+         CALL(chamada_partes);
+      }
+      else if(tk->class == integer_number)
+      {
+         sem_attrib_push("inteiro");
+
+         tk = get_token();
+      }
+      else if(tk->class == real_number)
+      {
+         sem_attrib_push("real");
+         tk = get_token();
+      }
+      else
+      {
+         CHECK_STRING(tk,"(");
+         tk = get_token();
+
+         CALL(expressao);
+
+         CHECK_STRING(tk,")");
+         tk = get_token();
+      }
+   }
+
+   if(strcmp(tk->string,"%") == SUCCESS)
+   {
+      tk = get_token();
+      CALL(fator);
+
+      sem_pop_check_push("inteiro");
+   }
+
 
 	return SUCCESS;
 }
@@ -1268,6 +1364,7 @@ int parcela_logica()
 
    if(strcmp(tk->string,"verdadeiro") == SUCCESS || strcmp(tk->string,"falso") == SUCCESS)
    {
+      sem_attrib_push("logico");
       tk = get_token();
    }
    else
@@ -1279,7 +1376,10 @@ int parcela_logica()
       {
          tk = get_token();
          CALL(exp_aritmetica);
+
+         sem_pop_check_push("logico");
       }
+
    }
    return SUCCESS;
 }
@@ -1294,26 +1394,35 @@ Autor: Nathan
 <termo_logico> ::= nao <parcela_logica> <outros_fatores_logicos>
                  | <parcela_logica> <outros_fatores_logicos>
 
-<outros_termos_logicos>   ::= ou <termo_logico> <outros_termos_logicos>  | epsilon
+<outros_termos_logicos>   ::= ou <expressao>  | epsilon
+
 
 */
 int expressao()
 {
    int ret;
 
-	while (1)
-	{
-		if(strcmp(tk->string,"nao") == SUCCESS)
-		   tk = get_token();
+   if(strcmp(tk->string,"nao") == SUCCESS)
+      tk = get_token();
 
-		CALL(parcela_logica);
-		CALL(outros_fatores_logicos);
 
-		if (strcmp(tk->string,"ou") != SUCCESS)
-			break;
+   CALL(parcela_logica);
+   sem_pop_check_push(sem_attrib_peek());
 
-		tk = get_token();
-	}
+   CALL(outros_fatores_logicos);
+
+   if(strcmp(sem_attrib_peek(), SEM_TYPE_ANY) == SUCCESS)
+      sem_attrib_pop();
+   else
+      sem_pop_check_push(sem_attrib_peek());
+
+
+   if (strcmp(tk->string,"ou") == SUCCESS)
+   {
+      tk = get_token();
+      CALL(expressao);
+      sem_pop_check_push(sem_attrib_peek());
+   }
 
    return SUCCESS;
 }
@@ -1330,14 +1439,60 @@ Autor: Nathan
 int outros_fatores_logicos()
 {
    int ret;
-   while(strcmp(tk->string,"e") == SUCCESS)
+
+   if(strcmp(tk->string,"e") == SUCCESS)
    {
+      sem_attrib_push("logico");
       tk = get_token();
 
       if(strcmp(tk->string,"nao") == SUCCESS)
+      {
          tk = get_token();
+      }
 
       CALL(parcela_logica);
+      sem_pop_check_push("logico");
+
+
+      CALL(outros_fatores_logicos);
+      sem_pop_check_push("logico");
    }
+   else
+   {
+      sem_attrib_push(SEM_TYPE_ANY);
+   }
+   return SUCCESS;
+}
+
+/*
+Automato 31
+
+Novo identificador, que agrupa algumas chamadas comuns dos automatos
+cmd_leia
+cmd_pont_ident
+fator
+
+*/
+int identificador_novo()
+{
+   int ret;
+
+   CHECK_CLASS(tk, identifier);
+
+   sem_register_ident_append(tk->string);
+   SEM_TRY(sem_check(sem_check_variable_declared, tk->string), sem_error_ident_nao_declarado, sem_gl_info.register_ident);
+
+   sem_attrib_push(sem_type_of(tk->string));
+
+   sem_context_change(sem_scope_register_query);
+   tk = get_token();
+
+   CALL(outros_ident);
+
+   sem_context_change(sem_scope_register_end);
+   sem_register_ident_clear();
+
+   CALL(dimensao);
+
    return SUCCESS;
 }

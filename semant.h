@@ -12,6 +12,9 @@
 
 #define  SEM_BTREE_ORDER            5
 
+#define  SEM_TYPE_UNDEFINED         "tipo_indefinido"
+#define  SEM_TYPE_ANY               "*"
+
 
 typedef enum sem_category
 {
@@ -37,8 +40,11 @@ typedef enum sem_scope_chg_type /* Semantic context change type */
 {
    sem_scope_global_to_local = 1,
    sem_scope_local_to_global,
-   sem_scope_register,
-   sem_scope_register_end
+   sem_scope_register_insert,
+   sem_scope_register_query,
+   sem_scope_register_end,
+   sem_scope_allows_return,
+   sem_scope_forbids_return
 }sem_scope_chg_type;
 
 typedef enum sem_error_type
@@ -59,6 +65,18 @@ typedef enum sem_pt_type
    sem_pt_type_pointer_var
 }sem_pt_type;
 
+typedef enum sem_check_type
+{
+   sem_check_type_declared = 1,
+   sem_check_variable_declared,
+   sem_check_var_const_declared,
+   sem_check_proc_func_declared,
+   sem_check_any_declared,
+   sem_check_return_allowed,
+   sem_check_attr,
+
+}sem_check_type;
+
 typedef struct sem_entry
 {
    char*          string;
@@ -75,30 +93,42 @@ typedef struct sem_table
    sem_entry*  pending_changes;
 }sem_table;
 
+/* Global semantic information */
+struct
+{
+   sem_table*  global_table;
+   sem_table*  local_table;
 
-sem_table*  sem_global_table;
-sem_table*  sem_local_table;
+   sem_table*  current_table;
 
-sem_table*  sem_current_table;
+   stack*      context_stack;
 
-stack*      sem_context_stack;
+   char*       register_ident;
+
+   int         context_allows_return;
+
+   stack*      attrib_stack;
+   char*       attrib_temp;
+
+   char*       attrib_expected;
+   char*       attrib_got;
+}sem_gl_info;
 
 
 
-void        sem_error            (sem_error_type error);
+void        sem_error            (sem_error_type error, char* str);
 int         sem_compare_keys     (const void* key1, const void* key2);
 
 void        sem_init             (void);
 
 sem_entry*  sem_entry_get        (void);
 sem_entry*  sem_entry_clone      (sem_entry* entry);
-void        sem_entry_dispose    (sem_entry* entry);
+void        sem_entry_dispose    (void* e);
 
 sem_table*  sem_table_get        (void);
 
 int         sem_table_insert     (sem_table* table, sem_entry* entry);
 int         sem_table_remove     (sem_table* table, char* string);
-int         sem_table_find       (sem_table* table, char* string);
 void        sem_table_dispose    (sem_table* table);
 
 
@@ -106,6 +136,23 @@ int         sem_pending_insert   (char* string, sem_category category);
 void        sem_pending_update   (sem_pending_upd_type upd, void* value);
 void        sem_pending_commit   (void);
 void        sem_context_change   (sem_scope_chg_type type);
+
+int         sem_check            (sem_check_type check, char* key);
+
+void        sem_register_ident_append  (char* str);
+void        sem_register_ident_clear   (void);
+
+void        sem_attrib_set       (char* value);
+void        sem_attrib_push      (char* type);
+char*       sem_attrib_pop       (void);
+char*       sem_attrib_peek      (void);
+
+int         sem_pop_check_push   (char* type);
+
+char*       sem_type_of          (char* key);
+
+/* ?? */
+void        sem_attrib_update    (char* value);
 
 
 #endif
