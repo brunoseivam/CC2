@@ -1,5 +1,14 @@
 #include "semant.h"
 
+/*
+ * Implementação das funções descritas no cabeçalho semant.h.
+ *  O funcionamento das funções está descrito de maneira geral no
+ *  cabeçalho. Aqui descreve-se o mecanismo destas funções, onde
+ *  for necessário elaborar o explicado em semant.h
+ *
+ */
+
+
 int sem_compare_keys(const void* key1, const void* key2)
 {
    return strcmp((char*) key1, (char*) key2);
@@ -55,16 +64,17 @@ void sem_entry_dispose(void* e)
    free(entry);
 }
 
+
 void sem_init(void)
 {
    sem_gl_info.global_table            = sem_table_get();
-   sem_gl_info.current_table           = sem_gl_info.global_table;
+   sem_gl_info.current_table           = sem_gl_info.global_table;   /* Contexto inicial é o global            */
 
    sem_gl_info.context_stack           = stack_get();
 
-   sem_gl_info.context_return_type     = NULL;
+   sem_gl_info.context_return_type     = NULL;                       /* Contexto global não permite 'retorne'  */
 
-   sem_register_ident_clear();
+   sem_register_ident_clear();                                       /* register_ident = ""                    */
 
    sem_gl_info.attrib_stack            = stack_get();
    sem_gl_info.attrib_temp             = (char*) malloc(sizeof(char));
@@ -110,18 +120,30 @@ sem_entry* sem_table_find(sem_table* table, char* string)
    return (sem_entry*) btree_find(table->table, string);
 }
 
+/* Insere uma entrada parcial na tabela semântica */
 int sem_pending_insert(char* string, sem_category category)
 {
+   /* Aloca uma nova entrada */
    sem_entry* partial_entry = sem_entry_get();
+
+   /* Ponteiro para entrada. Śerá usado em uma checagem adiante */
    sem_entry* check_entry;
 
+   /* Inicializa a entrada parcial com os valores passados */
    partial_entry->string = (char*) malloc((strlen(string)+1)*sizeof(char));
    strcpy(partial_entry->string, string);
-
    partial_entry->category = category;
 
+   /* Caso seja um procedimento ou uma função, aloca uma lista para seus parâmetros */
    if(category == procedure || category == function)
       sem_gl_info.current_table->pending_changes->param_list = list_get();
+
+
+   /* Aqui realiza-se uma checagem por uma peculiaridade da linguagem. Não se pode
+       definir uma variável local com mesmo nome de um procedimento/função global.
+      Assim, procura-se por um procedimento/função com mesmo nome da entrada sendo
+      inserida. Se for encontrado, a entrada não é inserida e ocorre erro.
+   */
 
    check_entry = sem_table_find(sem_gl_info.global_table, partial_entry->string);
 
@@ -130,13 +152,21 @@ int sem_pending_insert(char* string, sem_category category)
            check_entry->category == function)
            return ERROR;
 
+
+   /* Tenta-se inserir na tabela de símbolos do contexto corrente. Caso já exista, é
+         acusado um erro e a inserção falha */
    if(sem_table_insert(sem_gl_info.current_table, partial_entry) != SUCCESS)
       return ERROR;
 
+   /* Além de inserir na árvore B, a entrada TAMBÉM é inserida na pilha de pendentes. Isto
+       mantém uma pilha de ponteiros para entradas que ainda precisam de tipo. Este mecanismo
+       evita seja mantida uma lista de identificadores pendentes e depois seja necessário
+       buscá-los na árvore */
    stack_push(sem_gl_info.current_table->pending_stack, partial_entry);
 
    return SUCCESS;
 }
+
 
 void sem_pending_update(sem_pending_upd_type upd, void* value)
 {
@@ -237,9 +267,6 @@ void sem_pending_commit(void)
 extern void print_value(const void*, const void*);
 int sem_check(sem_check_type check, char* key)
 {
-   /*printf("\n\nsearching for %s (line: %d)\n", key, line_number);
-   printf("Current table:\n");
-   btree_print(sem_gl_info.current_table->table, print_value);*/
    sem_entry* entry = NULL;
 
    if(key)
@@ -248,16 +275,11 @@ int sem_check(sem_check_type check, char* key)
 
       if(!entry)
          if(check == sem_check_type_declared || sem_gl_info.current_table == sem_gl_info.local_table)
-         {
-            /*printf("%s not found! Will search global\n", key);
-            btree_print(sem_gl_info.global_table->table, print_value);*/
             entry = sem_table_find(sem_gl_info.global_table, key);
-         }
 
       if(!entry) return ERROR;
    }
 
-   /*printf("\n\n");*/
    switch(check)
    {
       case sem_check_type_declared:
@@ -370,7 +392,6 @@ void sem_context_change(sem_scope_chg_type type)
          t = sem_table_get();
          sem_pending_update(sem_upd_more_info, t);
 
-         /*sem_gl_info.current_table->pending_changes->more_info = (void*) sem_table_get();*/
 
          if(!stack_peek(sem_gl_info.context_stack))     /* Empty stack */
             last_context = sem_gl_info.current_table;

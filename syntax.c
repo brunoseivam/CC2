@@ -178,6 +178,10 @@ int programa()
 
    CHECK_STRING(tk, "algoritmo");
 
+	/*
+	 * Alteração do contexto global (sem_gl_info.sem_global_table)
+	 * para o contexto do algoritmo(local -  sem_gl_info.sem_local_table)
+	 */
    sem_context_change(sem_scope_global_to_local);
    /*gen_main_begin();*/
 
@@ -224,6 +228,13 @@ int declaracao_local()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
+	  
+	   /*
+	    * Insere o identificador, do tipo constante, criando uma nova entrada na tabela corrente, 
+	    *  checando se essa inserção é possível, ou seja, se não há nenhuma outra 
+	    *  entrada com esse mesmo nome. Caso haja algum identificador com o mesmo nome
+	    *  o analisador semântico acusará erro.
+	    */
       SEM_TRY(sem_pending_insert(tk->string, constant), sem_error_ident_ja_declarado, tk->string);
 
       tk = get_token();
@@ -232,18 +243,28 @@ int declaracao_local()
       tk = get_token();
 
       CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
+	  
+	   /*
+	    * Atualiza o tipo (type) da pending_changes para posterior commit em todas
+	    *  as entradas da pilha (pending_stack), que ainda possuem tipo indefinido. 
+	    *  Caso típico é: "declare a,b,c: inteiro". 
+	    */	
       sem_pending_update(sem_upd_type, tk->string);
-   	tk = get_token();
+	   tk = get_token();
 
       CHECK_STRING(tk, "=");
       tk = get_token();
 
-      /* TODO: checar os tipos, se correspondem */
       if( tk->class != string && tk->class != integer_number && tk->class != real_number)
          CHECK_STRINGS(tk, "verdadeiro", "falso");
 
       /*gen_const(sem_gl_info.current_table,tk->string);*/
-
+		
+		
+		/*
+	    * Atualiza todas as entradas da pilha (pending_stack) com as modificações
+	    *  feitas na pending_changes.
+	    */	
       sem_pending_commit();
 
       tk = get_token();
@@ -253,18 +274,21 @@ int declaracao_local()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
+		
+		/*
+	    * Definição de novo tipo, inserindo na tabela (e na pending_stack) uma nova entrada 
+		 * com categoria "type_def" (tipo definido pelo usuário), chegando se tipo com mesmo 
+		 * nome já existe.
+		 * Exemplo: "declare tipo tVinho: ... "
+	    */	
       SEM_TRY(sem_pending_insert(tk->string, type_def), sem_error_ident_ja_declarado, tk->string);
 
       tk = get_token();
 
       CHECK_STRING(tk, ":");
       tk = get_token();
-
-      /* TODO: mudar contexto */
+ 
       CALL(tipo);
-      /* Necessario dar commit ???
-         sem_pending_commit();*/
-
    }
    else
    {
@@ -289,7 +313,7 @@ int variavel()
 	while (1)
 	{
 		CHECK_CLASS(tk, identifier);
-
+		/* Inserção de nova variável na pending_stack e na tabela corrente. */
       SEM_TRY(sem_pending_insert(tk->string, variable), sem_error_ident_ja_declarado, tk->string);
 
       tk = get_token();
@@ -308,66 +332,69 @@ int variavel()
 
    /*gen_variable(sem_gl_info.current_table);*/
 
+	/* Commit das informações das variáveis na pending_stack. */
    sem_pending_commit();
 
 	return SUCCESS;
 }
 
+
 /*
-Automato 4
-Autor: Bruno
-
-<identificador>                 ::= ^ IDENT <outros_ident> <dimensao>
-                                 |  IDENT <outros_ident> <dimensao>
-*
-int identificador()
-{
-   int ret;
-
-   if( strcmp(tk->string, "^") == SUCCESS)
-      tk = get_token();
-
-   CHECK_CLASS(tk, identifier);
-   SEM_TRY(sem_check(sem_check_var_const_declared
-
-   tk = get_token();
-
-   CALL(outros_ident);
-   CALL(dimensao);
-
-   return SUCCESS;
-}*/
-/*
-
 Automato 5
 Autor: Bruno
 
 <outros_ident>                 ::= . IDENT <outros_ident> | epsilon
 */
-
-
 int outros_ident()
 {
+	/* 
+	 * Variável que irá contar quantas mudanças no contexto (global/local para registro
+	 *  ou registro mais externo para registro mais intero) foram feitas.
+	 *  Para cada "." encontrado, uma mudança de contexto é feita.
+	 *  Essa variável será utilizada para retornar ao contexto anterior à entrada do registro.
+	 */
+	 
    int scope_changes = 0;
 
    while( strcmp(tk->string, ".") == SUCCESS)
    {
+		/*
+		 * Concatenação do identificador atual com o "."
+		 * Isso é utilizado no caso: "vinho.preço", em que há a concatenação de vinho ".", 
+		 * para posterior concatenação com "preço",
+		 * considerando que a variável register_ident já contém "vinho".
+		 */ 
       sem_register_ident_append(tk->string);
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
-
+		
+		/*
+		 * Concatenação do identificador atual com o restante do identificador do registro já lido.
+		 * Isso é utilizado no caso: "vinho.preço", em que há a concatenação de vinho com preço, 
+		 * considerando que a variável register_ident já contém "vinho.".
+		 */ 
       sem_register_ident_append(tk->string);
+		
+		/* Verifica se a variável está declarada no contexto atual (no caso, regitro). */
       SEM_TRY(sem_check(sem_check_variable_declared, tk->string), sem_error_ident_nao_declarado, sem_gl_info.register_ident);
 
+		/* Atualiza o tipo da variável que está dentro do registro.
+		 *  Isso é necessário pois apenas o último tipo importa.
+		 *  Exemplo: "a.b.c <- algo", apenas o tipo de 'c' importa para a checagem de  consistência
+		 *  da atribuição.
+		 */
       sem_attrib_set(sem_type_of(tk->string));
 
+		/* Muda o contexto para o registro interno ao atual. */
       sem_context_change(sem_scope_register_query);
+		
       ++scope_changes;
 
       tk = get_token();
    }
 
+	/* Retorna ao contexto anterior à chamada do registro. */
    while(scope_changes--)
       sem_context_change(sem_scope_register_end);
 
@@ -385,14 +412,25 @@ Autor: Bruno
 int dimensao()
 {
    int ret;
+	
+	
    while( strcmp(tk->string, "[") == SUCCESS)
    {
+		/* Os appends foram feitos para concatenar a string total de um vetor, exemplo "vetor[0]",
+		 *  utilizado para a impressão correta do possível erro semântico.
+		 */
       sem_register_ident_append(tk->string);
       tk = get_token();
       sem_register_ident_append(tk->string);
 
       CALL(exp_aritmetica);
-      sem_attrib_pop();
+      
+		/*
+		 * exp_aritmetica sempre empilha algo na attrib_stack, mas dentro de []
+		 * não há verificação de tipo, portanto é necessário retirar esse tipo empilhado
+		 * da pilha.
+		 */
+		sem_attrib_pop();
 
 
       CHECK_STRING(tk, "]");
@@ -416,9 +454,15 @@ int tipo()
    if( strcmp(tk->string, "registro") == SUCCESS)
    {
 
+		/* Atualiza campo tipo da pending_changes para "registro" */
       sem_pending_update(sem_upd_type, tk->string);
+		
+		/*
+		 * Muda o contexto de local/global para o contexto do novo registro
+		 * que será criado.
+		 */
       sem_context_change(sem_scope_register_insert);
-
+ 
       tk = get_token();
 
       do
@@ -430,7 +474,11 @@ int tipo()
       tk = get_token();
 
 
+		
+		/* Retorna o contexto de registro para o anterior à declaração do registro. */
       sem_context_change(sem_scope_register_end);
+		
+		/* Dá o commit das mudanças realizadas na pending_changes para todas as entradas da pending_stack */
       sem_pending_commit();
    }
    else
@@ -456,18 +504,22 @@ int tipo_estendido()
 {
    if ( strcmp(tk->string, "^") == SUCCESS )
    {
+		/* Atualização do campo ponteiro da pending_changes */
       sem_pending_update(sem_upd_pointer, (void*) sem_pt_type_pointer);
       tk = get_token();
    }
 
    if ( tk->class == identifier )
    {
+		/* Verifica se o tipo existe. */
       SEM_TRY(sem_check(sem_check_type_declared, tk->string), sem_error_tipo_nao_declarado, tk->string);
    }
    else
    {
       CHECK_STRINGS(tk, "literal", "inteiro", "real", "logico");
 	}
+	
+	/* Atualiza o campo tipo da pending_changes. */
 	sem_pending_update(sem_upd_type, (void*) tk->string);
    tk = get_token();
 
@@ -484,6 +536,8 @@ Autor: Talita
 <parametros_opcional> ::=  <parametro>
                      | epsilon
 <declaracoes_locais> ::= <declaracao_local> <declaracoes_locais> | epsilon
+<identificador>                 ::= ^ IDENT <outros_ident> <dimensao>
+                                 |  IDENT <outros_ident> <dimensao>
 */
 
 int declaracao_global()
@@ -495,6 +549,8 @@ int declaracao_global()
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
+		
+		/* Inserção do nome do procedimento na pending_stack e na tabela global. */
       SEM_TRY(sem_pending_insert(tk->string, procedure), sem_error_ident_ja_declarado, tk->string);
       tk = get_token();
 
@@ -508,13 +564,18 @@ int declaracao_global()
 
       CHECK_STRING(tk, ")");
       tk = get_token();
-
+		
+		/*
+		 * Atualiza o tipo da pending_changes para SEM_TYPE_UNDEFINED, 
+		 *  pois esse campo deve ser indefinido para procedimento.
+		 */
       sem_pending_update(sem_upd_type, SEM_TYPE_UNDEFINED);
 
+		/* Atualiza os campos de pending_changes para todas as entradas na pending_stack. */
       sem_pending_commit();
 
+		/* Muda do escopo global para local (interno ao procedimento). */
       sem_context_change(sem_scope_global_to_local);
-
 
       while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
       	CALL(declaracao_local);
@@ -524,14 +585,16 @@ int declaracao_global()
       CHECK_STRING(tk, "fim_procedimento");
       tk = get_token();
 
+		/* Retorna do escopo local (procedimento) para o local. */
       sem_context_change(sem_scope_local_to_global);
-
    }
    else if ( strcmp(tk->string, "funcao") == SUCCESS )
    {
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
+		
+		/* Inserção do nome da função na pending_stack e na tabela global. */
       SEM_TRY(sem_pending_insert(tk->string, function), sem_error_ident_ja_declarado, tk->string);
 
       tk = get_token();
@@ -545,16 +608,18 @@ int declaracao_global()
       CHECK_STRING(tk, ")");
       tk = get_token();
 
-
-
       CHECK_STRING(tk, ":");
       tk = get_token();
 
-      CALL(tipo_estendido);
+      CALL(tipo_estendido); /* O tipo na pending_changes, nesse caso, é o tipo de retorno.*/
 
+		/* Permite o comando retorne no escopo (escopo de função)*/
       sem_context_change(sem_scope_allows_return);
+		
+		/* Atualiza os campos de pending_changes para todas as entradas na pending_stack. */
       sem_pending_commit();
 
+		/* Muda do escopo global para local (interno à função). */		
       sem_context_change(sem_scope_global_to_local);
 
       while ( search_first(tk, declaracao_local_firsts) == SUCCESS )
@@ -565,7 +630,13 @@ int declaracao_global()
       CHECK_STRING(tk, "fim_funcao");
       tk = get_token();
 
+		/* Retorna do escopo local (procedimento) para o local. */
       sem_context_change(sem_scope_local_to_global);
+		
+		/*
+		 * Proíbe o comando retorne no escopo, visto que apenas em função 
+		 *  é permitido o comando retorne 
+		 */
       sem_context_change(sem_scope_forbids_return);
    }
 
@@ -599,14 +670,9 @@ int parametro()
          sem_pending_update(sem_upd_pointer, (void*) sem_pt_type_var);
          tk = get_token();
       }
-
-      /* TODO: otimizar? */
+		
       while(1)
    	{
-      	/* Substituição de identificador()
-      	CALL(identificador);
-      	*/
-
       	if( strcmp(tk->string, "^") == SUCCESS)
       	{
       	   sem_pending_update(sem_upd_type, (void*)sem_pt_type_pointer);
@@ -617,10 +683,13 @@ int parametro()
          sem_pending_update(sem_upd_param_insert, tk->string);
          tk = get_token();
 
-         /*CALL(outros_ident);  * veementemente ignorado */
+			/*
+			 * Ignorado, pois consideramos não semântico declarar a.b.c 
+			 *  no parâmetro formal de função
+			 */
+         /*CALL(outros_ident); */
 
          CALL(dimensao);
-         /* Fim da substituição */
 
          if(strcmp(tk->string, ",") != SUCCESS) break;
          tk = get_token();
@@ -631,6 +700,7 @@ int parametro()
 
       CALL(tipo_estendido);
 
+		/* Insere na lista de parâmetros o novo parâmetro na pending_changes. */
       sem_pending_update(sem_upd_param_update, NULL);
 
       if ( strcmp(tk->string, ",") != SUCCESS ) break;
@@ -721,11 +791,13 @@ int cmd_leia()
    do
    {
       tk = get_token();
-      /*CALL(identificador); substituição */
+		
       if( strcmp(tk->string, "^") == SUCCESS)
          tk = get_token();
 
       CALL(identificador_novo);
+		
+		/* Não há restrições de tipo para o comando leia. */
       sem_attrib_pop();
 
    }while( strcmp(tk->string, ",") == SUCCESS);
@@ -759,6 +831,8 @@ int cmd_escreva()
    {
       tk = get_token();
       CALL(expressao);
+		
+		/* Não há restrições de tipo para o comando escreva. */
       sem_attrib_pop();
 
    }while(strcmp(tk->string, ",") == SUCCESS);
@@ -785,7 +859,8 @@ int cmd_se()
    tk = get_token();
 
    CALL(expressao);
-   /* SEM_TRY*/
+	
+	/* Não é feita a checagem para o tipo de expressão no comando se. */
    sem_attrib_pop();
 
    CHECK_STRING(tk, "entao");
@@ -821,6 +896,9 @@ int cmd_caso()
    tk = get_token();
 
    CALL(exp_aritmetica);
+	
+	/* Não é feita a checagem para o tipo de expressão no comando caso. */
+	sem_attrib_pop();
 
    CHECK_STRING(tk, "seja");
    tk = get_token();
@@ -855,6 +933,8 @@ int cmd_para()
    tk = get_token();
 
    CHECK_CLASS(tk, identifier);
+	
+	/* Verifica a existência do identificador. */
    SEM_TRY(sem_check(sem_check_variable_declared, tk->string), sem_error_ident_nao_declarado, tk->string);
    tk = get_token();
 
