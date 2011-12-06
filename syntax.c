@@ -352,6 +352,7 @@ int outros_ident()
 
    while( strcmp(tk->string, ".") == SUCCESS)
    {
+      sem_register_ident_append(tk->string);
       tk = get_token();
 
       CHECK_CLASS(tk, identifier);
@@ -370,6 +371,8 @@ int outros_ident()
    while(scope_changes--)
       sem_context_change(sem_scope_register_end);
 
+
+
    return SUCCESS;
 }
 /*
@@ -384,11 +387,16 @@ int dimensao()
    int ret;
    while( strcmp(tk->string, "[") == SUCCESS)
    {
+      sem_register_ident_append(tk->string);
       tk = get_token();
+      sem_register_ident_append(tk->string);
 
       CALL(exp_aritmetica);
+      sem_attrib_pop();
+
 
       CHECK_STRING(tk, "]");
+      sem_register_ident_append(tk->string);
       tk = get_token();
    }
    return SUCCESS;
@@ -502,6 +510,7 @@ int declaracao_global()
       tk = get_token();
 
       sem_pending_update(sem_upd_type, SEM_TYPE_UNDEFINED);
+
       sem_pending_commit();
 
       sem_context_change(sem_scope_global_to_local);
@@ -608,7 +617,8 @@ int parametro()
          sem_pending_update(sem_upd_param_insert, tk->string);
          tk = get_token();
 
-         CALL(outros_ident);  /* veementemente ignorado */
+         /*CALL(outros_ident);  * veementemente ignorado */
+
          CALL(dimensao);
          /* Fim da substituição */
 
@@ -937,6 +947,7 @@ int cmd_pont_ident()
    char* left_ident;
 
    CHECK_STRING(tk, "^");
+   sem_register_ident_set(tk->string);
    tk = get_token();
 
    CALL(identificador_novo);
@@ -1013,7 +1024,7 @@ int cmd_ident()
 
             if(!error_occurred)
             {
-               if(sem_check(sem_check_attr, last_token->string) != SUCCESS)
+               if(sem_check(sem_check_attr, NULL) != SUCCESS)
                {
                   sem_error(sem_error_incomp_de_parametros, last_token->string);
                   error_occurred = 1;
@@ -1031,20 +1042,29 @@ int cmd_ident()
    {
       char* left_ident;
 
+      /*stack_print(sem_gl_info.attrib_stack);*/
+
       sem_register_ident_set(last_token->string);
       SEM_TRY(sem_check(sem_check_variable_declared, last_token->string), sem_error_ident_nao_declarado, sem_gl_info.register_ident);
+
+      sem_attrib_set(sem_type_of(last_token->string));
 
       tk = last_token;
       sem_context_change(sem_scope_register_query);
       tk = cur_token;
 
-      sem_attrib_set(sem_type_of(last_token->string));
       CALL(outros_ident);
+
+
       sem_attrib_push(NULL);
+
+
+      /*stack_print(sem_gl_info.attrib_stack);*/
 
       sem_context_change(sem_scope_register_end);
 
       CALL(dimensao);
+
       left_ident = (char *) malloc(sizeof(char)*(1+strlen(sem_gl_info.register_ident)));
       strcpy(left_ident, sem_gl_info.register_ident);
 
@@ -1184,12 +1204,12 @@ int exp_aritmetica()
 
 	while(strcmp(tk->string, "+") == SUCCESS || strcmp(tk->string, "-") == SUCCESS)
    {
-      sem_attrib_enforce_top_type(SEM_TYPE_NUMBER);
+      /*sem_attrib_enforce_top_type(SEM_TYPE_NUMBER);*/
 
 	   tk = get_token();
 	   CALL(termo);
 
-	   sem_pop_check_push("inteiro");
+	   sem_pop_check_push(sem_attrib_peek());
    }
 
 	return SUCCESS;
@@ -1258,8 +1278,8 @@ int fator()
 
        CALL(identificador_novo);
 
-       sem_attrib_pop();            /* Não interessa o tipo de identificador */
-       sem_attrib_push("inteiro");  /* Se é um endereço = inteiro */
+       /*sem_attrib_pop();            Não interessa o tipo de identificador */
+       /*sem_attrib_push("inteiro");   Se é um endereço = inteiro */
 
    }
    else if(tk->class == string)
@@ -1307,6 +1327,9 @@ int fator()
             sem_entry* entry;
             int error_occurred = 0;
             int i = 0;
+
+            if(!param_list)
+               error_occurred = 1;
 
             do
             {
@@ -1356,16 +1379,19 @@ int fator()
          }
          else if(strcmp(tk->string,".") == SUCCESS || strcmp(tk->string,"[") == SUCCESS)
          {
-            sem_attrib_pop();
+            if(strcmp(tk->string,".") == SUCCESS)
+            {
+               sem_attrib_pop();
 
-            tk = last_token;
-            sem_context_change(sem_scope_register_query);
-            tk = cur_token;
+               tk = last_token;
+               sem_context_change(sem_scope_register_query);
+               tk = cur_token;
 
-            CALL(outros_ident);
-            sem_context_change(sem_scope_register_end);
+               CALL(outros_ident);
+               sem_context_change(sem_scope_register_end);
 
-            sem_attrib_push(NULL);
+               sem_attrib_push(NULL);
+            }
 
             CALL(dimensao);
          }
@@ -1591,6 +1617,7 @@ int identificador_novo()
    CHECK_CLASS(tk, identifier);
 
    sem_register_ident_set(tk->string);
+
    SEM_TRY(sem_check(sem_check_variable_declared, tk->string), sem_error_ident_nao_declarado, sem_gl_info.register_ident);
 
    sem_attrib_set(sem_type_of(tk->string));

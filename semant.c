@@ -13,6 +13,7 @@ sem_entry* sem_entry_get(void)
    entry->category   = 0;
    entry->type       = NULL;
    entry->pointer    = sem_pt_type_none;
+   entry->param_list = NULL;
    entry->more_info  = NULL;
 
    return entry;
@@ -37,7 +38,7 @@ sem_entry* sem_entry_clone(sem_entry* entry)
    }
 
    new_entry->pointer    = entry->pointer;
-
+   new_entry->param_list = entry->param_list;   /* Aqui NAO será um clone */
    new_entry->more_info  = entry->more_info;    /* Aqui NAO será um clone */
 
    return new_entry;
@@ -66,6 +67,11 @@ void sem_init(void)
    sem_register_ident_clear();
 
    sem_gl_info.attrib_stack            = stack_get();
+   sem_gl_info.attrib_temp             = (char*) malloc(sizeof(char));
+   strcpy(sem_gl_info.attrib_temp, "");
+
+
+   sem_insert_basic_functions();
 }
 
 sem_table* sem_table_get(void)
@@ -107,6 +113,7 @@ sem_entry* sem_table_find(sem_table* table, char* string)
 int sem_pending_insert(char* string, sem_category category)
 {
    sem_entry* partial_entry = sem_entry_get();
+   sem_entry* check_entry;
 
    partial_entry->string = (char*) malloc((strlen(string)+1)*sizeof(char));
    strcpy(partial_entry->string, string);
@@ -114,7 +121,14 @@ int sem_pending_insert(char* string, sem_category category)
    partial_entry->category = category;
 
    if(category == procedure || category == function)
-      sem_gl_info.current_table->pending_changes->more_info = (void*) list_get();
+      sem_gl_info.current_table->pending_changes->param_list = list_get();
+
+   check_entry = sem_table_find(sem_gl_info.global_table, partial_entry->string);
+
+   if(check_entry)
+      if(check_entry->category == procedure ||
+           check_entry->category == function)
+           return ERROR;
 
    if(sem_table_insert(sem_gl_info.current_table, partial_entry) != SUCCESS)
       return ERROR;
@@ -122,7 +136,6 @@ int sem_pending_insert(char* string, sem_category category)
    stack_push(sem_gl_info.current_table->pending_stack, partial_entry);
 
    return SUCCESS;
-
 }
 
 void sem_pending_update(sem_pending_upd_type upd, void* value)
@@ -160,14 +173,15 @@ void sem_pending_update(sem_pending_upd_type upd, void* value)
          strcpy(temp_entry->string, (char*) value);
          temp_entry->category = variable;
 
-         temp_list = (list*) sem_gl_info.current_table->pending_changes->more_info;
+         list_insert(sem_gl_info.current_table->pending_changes->param_list,
+                     (void*) temp_entry);
 
-         list_insert(temp_list, (void*) temp_entry);
+         /* TODO: checar se já está na lista? */
 
          break;
 
       case sem_upd_param_update:
-         temp_list = (list*)sem_gl_info.current_table->pending_changes->more_info;
+         temp_list = sem_gl_info.current_table->pending_changes->param_list;
 
          for(i = temp_list->size - 1;
              (temp_entry = ((sem_entry*) list_elem_at(temp_list, i))) &&
@@ -180,6 +194,8 @@ void sem_pending_update(sem_pending_upd_type upd, void* value)
             temp_entry->type    = (char*) malloc(type_len*sizeof(char));
 
             strcpy(temp_entry->type, (char*)sem_gl_info.current_table->pending_changes->type);
+
+            temp_entry->more_info = sem_gl_info.current_table->pending_changes->more_info;
 
             sem_gl_info.current_table->pending_changes->pointer = sem_pt_type_none;
             free(sem_gl_info.current_table->pending_changes->type);
@@ -206,15 +222,13 @@ void sem_pending_commit(void)
          entry->type = (char*) malloc((strlen(sem_gl_info.current_table->pending_changes->type)+1)*sizeof(char));
          strcpy(entry->type   , sem_gl_info.current_table->pending_changes->type);
       }
+
+      entry->param_list    = sem_gl_info.current_table->pending_changes->param_list;
+
       entry->more_info     = sem_gl_info.current_table->pending_changes->more_info;
    }
 
    sem_gl_info.current_table->pending_changes->pointer     = sem_pt_type_none;
-   /*
-   sem_gl_info.current_table->pending_changes->more_info   = NULL;
-
-   more_info pode ser usado pela troca de contexto. deve ser anulado nela.
-   */
    free(sem_gl_info.current_table->pending_changes->type);
    sem_gl_info.current_table->pending_changes->type        = NULL;
 
@@ -315,8 +329,8 @@ void sem_context_change(sem_scope_chg_type type)
 {
    static sem_table* last_context = NULL;
    sem_table*        t            = NULL;
-
    sem_entry*        temp_entry   = NULL;
+   list*             param_list   = NULL;
    int i;
 
    switch(type)
@@ -325,18 +339,20 @@ void sem_context_change(sem_scope_chg_type type)
 
          sem_gl_info.local_table = sem_table_get();
 
+         param_list = sem_gl_info.global_table->pending_changes->param_list;
+
          /* Insere os parâmetros da funcao/procedimento na tabela local */
-         if(sem_gl_info.global_table->pending_changes->more_info)
+         if(param_list)
             for(i = 0;
-               i < ((list*) sem_gl_info.global_table->pending_changes->more_info)->size;
+               i < param_list->size;
                ++i)
             {
-               sem_entry* entry = sem_entry_clone(list_elem_at(((list*) sem_gl_info.global_table->pending_changes->more_info), i));
+               sem_entry* entry = sem_entry_clone(list_elem_at(param_list, i));
                sem_table_insert(sem_gl_info.local_table, entry);
             }
 
-         /* Impede que funções/procedimentos futuros usem o mesmo more_info */
-         sem_gl_info.global_table->pending_changes->more_info = NULL;
+         /* Impede que funções/procedimentos futuros usem o mesmo param_list */
+         sem_gl_info.global_table->pending_changes->param_list = NULL;
 
          sem_gl_info.current_table = sem_gl_info.local_table;
          break;
@@ -407,21 +423,17 @@ void sem_context_change(sem_scope_chg_type type)
 
 void sem_register_ident_set(char* str)
 {
-   sem_register_ident_clear();
+   if(strcmp(sem_gl_info.register_ident,"^"))
+      sem_register_ident_clear();
+
    sem_register_ident_append(str);
 }
 
 void sem_register_ident_append(char* str)
 {
-   int len = strlen(sem_gl_info.register_ident);
-   int put_point = len > 0;
-
-   len += strlen(str) + put_point;
+   int len = strlen(sem_gl_info.register_ident) + strlen(str);
 
    sem_gl_info.register_ident = (char*) realloc(sem_gl_info.register_ident, (len + 1)*sizeof(char));
-
-   if(put_point)
-      strcat(sem_gl_info.register_ident, ".");
 
    strcat(sem_gl_info.register_ident, str);
 }
@@ -431,10 +443,6 @@ void sem_register_ident_clear(void)
    sem_gl_info.register_ident = (char*) realloc(sem_gl_info.register_ident, sizeof(char));
    strcpy(sem_gl_info.register_ident, "");
 }
-
-
-
-
 
 char* sem_type_of(char* key)
 {
@@ -455,7 +463,7 @@ list* sem_list_of(char* key)
 
    if(!entry) return NULL;
 
-   return (list*) entry->more_info;
+   return entry->param_list;
 }
 
 extern void stack_print(stack* s);
@@ -521,6 +529,140 @@ void sem_attrib_enforce_top_type(char* type)
       sem_attrib_pop();
       sem_attrib_push(SEM_TYPE_UNDEFINED);
    }
+}
+
+/*
+void limpa_entrada(void);
+char *subLiteral(char *, int, int);
+double sen(double);
+double pot(double, double);
+int trunca(double);
+double frac(double);
+double raiz(double);
+double cos(double);
+*/
+void sem_insert_basic_functions(void)
+{
+   struct func
+   {
+      sem_category   cat;
+      char           name[15];
+      char           type[15];
+
+      int            n_param;
+
+      char           p_name[3][15];
+      char           p_type[3][25];
+
+   }basic_functions[8] =
+   {
+      {
+         procedure,
+         "limpa_entrada",
+         SEM_TYPE_UNDEFINED,
+         0
+      },
+
+      {
+         function,
+         "subLiteral",
+         "literal",
+         3,
+         {"p1", "p2", "p3"},
+         {"literal", "inteiro", "inteiro"}
+      },
+
+      {
+         function,
+         "sen",
+         "real",
+         1,
+         {"p1"},
+         {"real"}
+      },
+
+      {
+         function,
+         "pot",
+         "real",
+         2,
+         {"p1", "p2"},
+         {"real", "real"}
+      },
+
+      {
+         function,
+         "trunca",
+         "inteiro",
+         1,
+         {"p1"},
+         {"real"}
+      },
+
+      {
+         function,
+         "frac",
+         "real",
+         1,
+         {"p1"},
+         {"real"}
+      },
+
+      {
+         function,
+         "raiz",
+         "real",
+         1,
+         {"p1"},
+         {"real"}
+      },
+
+      {
+         function,
+         "cos",
+         "real",
+         1,
+         {"p1"},
+         {"real"}
+      }
+   };
+
+   int i;
+
+   for(i = 0; i < 8; ++i)
+   {
+      sem_entry* entry  = sem_entry_get();
+
+      entry->category   = basic_functions[i].cat;
+
+      entry->string     = (char*) malloc(sizeof(char)*(1+strlen(basic_functions[i].name)));
+      entry->type       = (char*) malloc(sizeof(char)*(1+strlen(basic_functions[i].type)));
+
+      strcpy(entry->string,   basic_functions[i].name);
+      strcpy(entry->type,     basic_functions[i].type);
+
+      entry->param_list = list_get();
+
+      int j;
+
+      for(j = 0; j < basic_functions[i].n_param; ++j)
+      {
+         sem_entry* p_entry   = sem_entry_get();
+
+         p_entry->category    = variable;
+
+         p_entry->string      = (char*) malloc(sizeof(char)*(1+strlen(basic_functions[i].p_name[j])));
+         p_entry->type        = (char*) malloc(sizeof(char)*(1+strlen(basic_functions[i].p_type[j])));
+
+         strcpy(p_entry->string, basic_functions[i].p_name[j]);
+         strcpy(p_entry->type,   basic_functions[i].p_type[j]);
+
+         list_insert(entry->param_list, p_entry);
+      }
+
+      sem_table_insert(sem_gl_info.global_table, entry);
+   }
+
 }
 
 

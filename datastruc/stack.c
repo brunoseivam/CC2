@@ -49,9 +49,11 @@ void*    stack_peek     (stack* s)
 void stack_print(stack* s)
 {
    struct stacki_node* n = s->top;
+   printf("stack-----\n");
    while(n)
    {
       printf("stack: %s\n", (char*) n->value);
       n = n->next;
    }
+   printf("end_stack----\n\n");
 }

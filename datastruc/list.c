@@ -28,7 +28,7 @@ void     list_insert    (list* l, void* value)
 
 void*    list_elem_at   (list* l, int position)
 {
-   if(0 <= position && position < l->size)
+   if(l && 0 <= position && position < l->size)
       return l->elements[position];
    return NULL;
 }

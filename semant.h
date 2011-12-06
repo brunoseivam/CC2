@@ -84,6 +84,7 @@ typedef struct sem_entry
    sem_category   category;
    char*          type;
    sem_pt_type    pointer;
+   list*          param_list;
    void*          more_info;
 }sem_entry;
 
@@ -158,5 +159,6 @@ list*       sem_list_of          (char* key);
 /* ?? */
 void        sem_attrib_update    (char* value);
 
+void        sem_insert_basic_functions    (void);
 
 #endif
