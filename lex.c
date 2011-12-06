@@ -9,6 +9,8 @@ token* get_token()
    int comment_recognized;
    char c;
 
+   prev_line_number = line_number;
+
    do
    {
       comment_recognized = 0;

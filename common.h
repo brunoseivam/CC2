@@ -76,6 +76,9 @@ FILE     *in_file, *out_file;
 /* Linha atual */
 int      line_number;
 
+/* Linha do token anterior */
+int      prev_line_number;
+
 /* Último token lido */
 token*   tk;
 

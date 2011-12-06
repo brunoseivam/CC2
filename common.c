@@ -18,6 +18,7 @@ int   open_files(char* in, char* out)
       return ERROR;
 
    line_number = 1;
+   prev_line_number = 1;
    return SUCCESS;
 }
 

@@ -12,8 +12,9 @@
 
 #define  SEM_BTREE_ORDER            5
 
+
+#define  SEM_TYPE_NUMBER            "number"
 #define  SEM_TYPE_UNDEFINED         "tipo_indefinido"
-#define  SEM_TYPE_ANY               "*"
 
 
 typedef enum sem_category
@@ -73,7 +74,7 @@ typedef enum sem_check_type
    sem_check_proc_func_declared,
    sem_check_any_declared,
    sem_check_return_allowed,
-   sem_check_attr,
+   sem_check_attr
 
 }sem_check_type;
 
@@ -105,7 +106,7 @@ struct
 
    char*       register_ident;
 
-   int         context_allows_return;
+   char*       context_return_type;
 
    stack*      attrib_stack;
    char*       attrib_temp;
@@ -139,6 +140,7 @@ void        sem_context_change   (sem_scope_chg_type type);
 
 int         sem_check            (sem_check_type check, char* key);
 
+void        sem_register_ident_set     (char* str);
 void        sem_register_ident_append  (char* str);
 void        sem_register_ident_clear   (void);
 
@@ -147,9 +149,11 @@ void        sem_attrib_push      (char* type);
 char*       sem_attrib_pop       (void);
 char*       sem_attrib_peek      (void);
 
-int         sem_pop_check_push   (char* type);
+int         sem_pop_check_push            (char* type);
+void        sem_attrib_enforce_top_type   (char* type);
 
 char*       sem_type_of          (char* key);
+list*       sem_list_of          (char* key);
 
 /* ?? */
 void        sem_attrib_update    (char* value);

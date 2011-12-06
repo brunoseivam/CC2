@@ -61,7 +61,7 @@ void sem_init(void)
 
    sem_gl_info.context_stack           = stack_get();
 
-   sem_gl_info.context_allows_return   = 0;
+   sem_gl_info.context_return_type     = NULL;
 
    sem_register_ident_clear();
 
@@ -271,7 +271,7 @@ int sem_check(sem_check_type check, char* key)
          return   SUCCESS;
 
       case sem_check_return_allowed:
-         return   (sem_gl_info.context_allows_return) ?
+         return   (sem_gl_info.context_return_type) ?
                   SUCCESS : ERROR;
 
       case sem_check_attr:
@@ -289,25 +289,25 @@ void sem_error(sem_error_type error, char* error_string)
    switch(error)
    {
       case sem_error_ident_ja_declarado:
-         fprintf(out_file, "Linha %d: identificador %s ja declarado anteriormente\n", line_number, error_string);
+         fprintf(out_file, "Linha %d: identificador %s ja declarado anteriormente\n", prev_line_number, error_string);
          break;
       case sem_error_tipo_nao_declarado:
-         fprintf(out_file, "Linha %d: tipo %s nao declarado\n", line_number, error_string);
+         fprintf(out_file, "Linha %d: tipo %s nao declarado\n", prev_line_number, error_string);
          break;
       case sem_error_ident_nao_declarado:
-         fprintf(out_file, "Linha %d: identificador %s nao declarado\n", line_number, error_string);
+         fprintf(out_file, "Linha %d: identificador %s nao declarado\n", prev_line_number, error_string);
          break;
       case sem_error_incomp_de_parametros:
-         fprintf(out_file, "Linha %d: incompatibilidade de parametros na chamada de %s\n", line_number, error_string);
+         fprintf(out_file, "Linha %d: incompatibilidade de parametros na chamada de %s\n", prev_line_number, error_string);
          break;
       case sem_error_atrib_nao_compativel:
-         fprintf(out_file, "Linha %d: atribuicao nao compativel para %s\n", line_number, error_string);
+         fprintf(out_file, "Linha %d: atribuicao nao compativel para %s\n", prev_line_number, error_string);
          break;
       case sem_error_retorne_nao_permitido:
-         fprintf(out_file, "Linha %d: comando retorne nao permitido nesse escopo\n", line_number);
+         fprintf(out_file, "Linha %d: comando retorne nao permitido nesse escopo\n", prev_line_number);
          break;
       default:
-         fprintf(out_file, "Codigo de erro %d nao conhecido. Linha: %d Token: %s", error, line_number, error_string);
+         fprintf(out_file, "Codigo de erro %d nao conhecido. Linha: %d Token: %s", error, prev_line_number, error_string);
    }
 }
 
@@ -392,13 +392,23 @@ void sem_context_change(sem_scope_chg_type type)
          break;
 
       case sem_scope_allows_return:
-         sem_gl_info.context_allows_return = 1;
+         sem_gl_info.context_return_type =
+                   (char*) malloc((1+strlen(sem_gl_info.current_table->pending_changes->type))*sizeof(char));
+
+         strcpy(sem_gl_info.context_return_type, sem_gl_info.current_table->pending_changes->type);
          break;
 
       case sem_scope_forbids_return:
-         sem_gl_info.context_allows_return = 0;
+         free(sem_gl_info.context_return_type);
+         sem_gl_info.context_return_type = NULL;
          break;
    }
+}
+
+void sem_register_ident_set(char* str)
+{
+   sem_register_ident_clear();
+   sem_register_ident_append(str);
 }
 
 void sem_register_ident_append(char* str)
@@ -422,6 +432,10 @@ void sem_register_ident_clear(void)
    strcpy(sem_gl_info.register_ident, "");
 }
 
+
+
+
+
 char* sem_type_of(char* key)
 {
    sem_entry* entry = sem_table_find(sem_gl_info.current_table, key);
@@ -435,16 +449,31 @@ char* sem_type_of(char* key)
    return entry->type;
 }
 
-extern stack_print(stack* s);
+list* sem_list_of(char* key)
+{
+   sem_entry* entry = sem_table_find(sem_gl_info.global_table, key);
+
+   if(!entry) return NULL;
+
+   return (list*) entry->more_info;
+}
+
+extern void stack_print(stack* s);
 void sem_attrib_push(char* type)
 {
    if(!type) type = sem_gl_info.attrib_temp;
 
+   if(strcmp(type, "inteiro") == SUCCESS ||
+      strcmp(type, "real") == SUCCESS)
+      type = SEM_TYPE_NUMBER;
+
    stack_push(sem_gl_info.attrib_stack, (void*) type);
 
-   printf("after push...\n");
+/*
+   printf("will push %s. after push:\n", type);
    stack_print(sem_gl_info.attrib_stack);
    printf("end_stack\n\n\n");
+*/
 
 }
 
@@ -473,25 +502,25 @@ int sem_pop_check_push(char* type)
    attr2 = sem_attrib_pop();
 
    if(strcmp(attr1, SEM_TYPE_UNDEFINED) == SUCCESS ||
-      strcmp(attr2, SEM_TYPE_UNDEFINED) == SUCCESS)
+      strcmp(attr2, SEM_TYPE_UNDEFINED) == SUCCESS ||
+      strcmp(attr1, attr2) != SUCCESS)
    {
       if(type) sem_attrib_push(SEM_TYPE_UNDEFINED);
       return ERROR;
    }
-   else if(strcmp(attr1, attr2) != SUCCESS)
-   {
-      if((strcmp(attr1, SEM_TYPE_ANY) != SUCCESS) && (strcmp(attr2, SEM_TYPE_ANY) != SUCCESS))
-         if( ((strcmp(attr1, "real") != SUCCESS) && (strcmp(attr1, "inteiro") != SUCCESS)) ||
-             ((strcmp(attr2, "real") != SUCCESS) && (strcmp(attr2, "inteiro") != SUCCESS))   )
-          {
-            printf("will push after sem_pop_check_push\n");
-            if(type) sem_attrib_push(SEM_TYPE_UNDEFINED);
-            return ERROR;
-          }
-   }
-   printf("will push after sem_pop_check_push\n");
+
+   /*printf("will push after sem_pop_check_push\n");*/
    if(type) sem_attrib_push(type);
    return SUCCESS;
+}
+
+void sem_attrib_enforce_top_type(char* type)
+{
+   if(strcmp(type, sem_attrib_peek()) != SUCCESS)
+   {
+      sem_attrib_pop();
+      sem_attrib_push(SEM_TYPE_UNDEFINED);
+   }
 }
 
 
