@@ -1,3 +1,0 @@
-Linha 15: incompatibilidade de parametros na chamada de subLiteral
-Linha 15: atribuicao nao compativel para formato2
-Fim da compilacao

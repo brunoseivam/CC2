@@ -1,4 +1,4 @@
-Trabalho 2 de Construção de Compiladores 2
+Trabalho 3 de Construção de Compiladores 2
 
 Linguagem utilizada: C (ISO C99)
 

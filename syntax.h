@@ -4,7 +4,7 @@
 #include "common.h"
 #include "lex.h"
 #include "semant.h"
-#include "generator.h"
+/*#include "generator.h"*/
 
 
 /* As macros abaixo servem para trechos comuns do código, que se repetiriam muitas vezes.

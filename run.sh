@@ -5,7 +5,8 @@ folder2="T3_arquivos_teste/2.arquivos_sem_erros"
 folder3="T3_arquivos_teste/3.arquivos_gera_codigo_C"
 
 
-gcc -Wall common.c lex.c syntax.c semant.c generator.c datastruc/btree.c datastruc/stack.c datastruc/list.c main.c -o  compiler
+#gcc -Wall common.c lex.c syntax.c semant.c generator.c datastruc/btree.c datastruc/stack.c datastruc/list.c main.c -o  compiler
+gcc -Wall common.c lex.c syntax.c semant.c datastruc/btree.c datastruc/stack.c datastruc/list.c main.c -o  compiler
 
 #./compiler entrada.txt saida.txt
 #exit

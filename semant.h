@@ -389,7 +389,7 @@ char*       sem_attrib_peek      (void);
 */
 void        sem_attrib_enforce_top_type   (char* type);
 
-s
+
 /* Esta função desempilha dois valores da pilha de tipos, [pop]
    checa se os dois tipos são compatíveis e               [check]
    empilha o resultado da comparação.                     [push]

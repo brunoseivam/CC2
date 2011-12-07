@@ -942,11 +942,13 @@ int cmd_para()
    tk = get_token();
 
    CALL(exp_aritmetica);
-
+	sem_attrib_pop();
+	
    CHECK_STRING(tk, "ate");
    tk = get_token();
 
    CALL(exp_aritmetica);
+	sem_attrib_pop();
 
    CHECK_STRING(tk, "faca");
    tk = get_token();

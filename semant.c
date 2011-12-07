@@ -1,10 +1,10 @@
 #include "semant.h"
 
 /*
- * Implementa√ß√£o das fun√ß√µes descritas no cabe√ßalho semant.h.
- *  O funcionamento das fun√ß√µes est√° descrito de maneira geral no
- *  cabe√ßalho. Aqui descreve-se o mecanismo destas fun√ß√µes, onde
- *  for necess√°rio elaborar o explicado em semant.h
+ * ImplementaÁ„o das funÁıes descritas no cabeÁalho semant.h.
+ *  O funcionamento das funÁıes est· descrito de maneira geral no
+ *  cabeÁalho. Aqui descreve-se o mecanismo destas funÁıes, onde
+ *  for necess·rio elaborar o explicado em semant.h
  *
  */
 
@@ -47,8 +47,8 @@ sem_entry* sem_entry_clone(sem_entry* entry)
    }
 
    new_entry->pointer    = entry->pointer;
-   new_entry->param_list = entry->param_list;   /* Aqui NAO ser√° um clone */
-   new_entry->more_info  = entry->more_info;    /* Aqui NAO ser√° um clone */
+   new_entry->param_list = entry->param_list;   /* Aqui NAO ser· um clone */
+   new_entry->more_info  = entry->more_info;    /* Aqui NAO ser· um clone */
 
    return new_entry;
 }
@@ -68,11 +68,11 @@ void sem_entry_dispose(void* e)
 void sem_init(void)
 {
    sem_gl_info.global_table            = sem_table_get();
-   sem_gl_info.current_table           = sem_gl_info.global_table;   /* Contexto inicial √© o global            */
+   sem_gl_info.current_table           = sem_gl_info.global_table;   /* Contexto inicial È o global            */
 
    sem_gl_info.context_stack           = stack_get();
 
-   sem_gl_info.context_return_type     = NULL;                       /* Contexto global n√£o permite 'retorne'  */
+   sem_gl_info.context_return_type     = NULL;                       /* Contexto global n„o permite 'retorne'  */
 
    sem_register_ident_clear();                                       /* register_ident = ""                    */
 
@@ -120,13 +120,13 @@ sem_entry* sem_table_find(sem_table* table, char* string)
    return (sem_entry*) btree_find(table->table, string);
 }
 
-/* Insere uma entrada parcial na tabela sem√¢ntica */
+/* Insere uma entrada parcial na tabela sem‚ntica */
 int sem_pending_insert(char* string, sem_category category)
 {
    /* Aloca uma nova entrada */
    sem_entry* partial_entry = sem_entry_get();
 
-   /* Ponteiro para entrada. ≈öer√° usado em uma checagem adiante */
+   /* Ponteiro para entrada. Ser· usado em uma checagem adiante */
    sem_entry* check_entry;
 
    /* Inicializa a entrada parcial com os valores passados */
@@ -134,15 +134,15 @@ int sem_pending_insert(char* string, sem_category category)
    strcpy(partial_entry->string, string);
    partial_entry->category = category;
 
-   /* Caso seja um procedimento ou uma fun√ß√£o, aloca uma lista para seus par√¢metros */
+   /* Caso seja um procedimento ou uma funÁ„o, aloca uma lista para seus par‚metros */
    if(category == procedure || category == function)
       sem_gl_info.current_table->pending_changes->param_list = list_get();
 
 
-   /* Aqui realiza-se uma checagem por uma peculiaridade da linguagem. N√£o se pode
-       definir uma vari√°vel local com mesmo nome de um procedimento/fun√ß√£o global.
-      Assim, procura-se por um procedimento/fun√ß√£o com mesmo nome da entrada sendo
-      inserida. Se for encontrado, a entrada n√£o √© inserida e ocorre erro.
+   /* Aqui realiza-se uma checagem por uma peculiaridade da linguagem. N„o se pode
+       definir uma vari·vel local com mesmo nome de um procedimento/funÁ„o global.
+      Assim, procura-se por um procedimento/funÁ„o com mesmo nome da entrada sendo
+      inserida. Se for encontrado, a entrada n„o È inserida e ocorre erro.
    */
 
    check_entry = sem_table_find(sem_gl_info.global_table, partial_entry->string);
@@ -153,21 +153,21 @@ int sem_pending_insert(char* string, sem_category category)
            return ERROR;
 
 
-   /* Tenta-se inserir na tabela de s√≠mbolos do contexto corrente. Caso j√° exista, √©
-         acusado um erro e a inser√ß√£o falha */
+   /* Tenta-se inserir na tabela de sÌmbolos do contexto corrente. Caso j· exista, È
+         acusado um erro e a inserÁ„o falha */
    if(sem_table_insert(sem_gl_info.current_table, partial_entry) != SUCCESS)
       return ERROR;
 
-   /* Al√©m de inserir na √°rvore B, a entrada TAMB√âM √© inserida na pilha de pendentes. Isto
-       mant√©m uma pilha de ponteiros para entradas que ainda precisam de tipo. Este mecanismo
-       evita seja mantida uma lista de identificadores pendentes e depois seja necess√°rio
-       busc√°-los na √°rvore */
+   /* AlÈm de inserir na ·rvore B, a entrada TAMB…M È inserida na pilha de pendentes. Isto
+       mantÈm uma pilha de ponteiros para entradas que ainda precisam de tipo. Este mecanismo
+       evita seja mantida uma lista de identificadores pendentes e depois seja necess·rio
+       busc·-los na ·rvore */
    stack_push(sem_gl_info.current_table->pending_stack, partial_entry);
 
    return SUCCESS;
 }
 
-
+/* Atualiza uma informaÁ„o para as entradas pendentes. */
 void sem_pending_update(sem_pending_upd_type upd, void* value)
 {
    sem_entry*  temp_entry;
@@ -176,6 +176,7 @@ void sem_pending_update(sem_pending_upd_type upd, void* value)
    int i;
    switch(upd)
    {
+		/* Atualiza o tipo das entradas incompletas pendentes */
       case sem_upd_type:
          sem_gl_info.current_table->pending_changes->type =
             (char*) malloc((strlen((char*)value)+1)*sizeof(char));
@@ -183,6 +184,7 @@ void sem_pending_update(sem_pending_upd_type upd, void* value)
          strcpy(sem_gl_info.current_table->pending_changes->type, (char*)value);
          break;
 
+		/* Atualiza o campo 'pointer' das entradas pendentes */
       case sem_upd_pointer:
       /* Nota: none deve ser 0
                var deve ser 01 ou 10
@@ -192,10 +194,13 @@ void sem_pending_update(sem_pending_upd_type upd, void* value)
          sem_gl_info.current_table->pending_changes->pointer |= (sem_pt_type) value;
          break;
 
+		/* Atualiza o ponteiro para mais informaÁıes das entradas pendentes */
       case sem_upd_more_info:
          sem_gl_info.current_table->pending_changes->more_info = value;
          break;
 
+		/* Insere um par‚metro na lista de par‚metros da funÁ„o/procedimento pendente.
+		   O par‚metro inserido ainda ser· carente de tipo */
       case sem_upd_param_insert:
          temp_entry = sem_entry_get();
 
@@ -206,13 +211,17 @@ void sem_pending_update(sem_pending_upd_type upd, void* value)
          list_insert(sem_gl_info.current_table->pending_changes->param_list,
                      (void*) temp_entry);
 
-         /* TODO: checar se j√° est√° na lista? */
+         /* TODO: checar se j· est· na lista? */
 
          break;
 
+		/* Atualia o tipo dos par‚metros sem tipo. Os par‚metros sem tipo estar„o na cauda da lista.
+			Assim, basta percorrer a lista de tr·s pra frente, atualizando os tipos atÈ encontrar o
+			 primeiro par‚metro que j· contenha tipo. */
       case sem_upd_param_update:
          temp_list = sem_gl_info.current_table->pending_changes->param_list;
 
+			/* Itera sobre a lista */
          for(i = temp_list->size - 1;
              (temp_entry = ((sem_entry*) list_elem_at(temp_list, i))) &&
              temp_entry->type == NULL;
@@ -239,7 +248,8 @@ void sem_pending_update(sem_pending_upd_type upd, void* value)
    }
 }
 
-
+/* Aplica de fato as alteraÁıes pendentes nas entradas carentes de tipo, que est„o na pilha
+    pending_stack */
 void sem_pending_commit(void)
 {
    sem_entry* entry;
@@ -256,19 +266,25 @@ void sem_pending_commit(void)
       entry->param_list    = sem_gl_info.current_table->pending_changes->param_list;
 
       entry->more_info     = sem_gl_info.current_table->pending_changes->more_info;
+
+		/* Lembrando que n„o precisa inserir esta entrada na ·rvore, pois ela j· est· l·!
+		   entry È um ponteiro para esta entrada para dentro da ·rvore, basta ele ser desempilhado. */
    }
 
+	/* Limpa alguns campos da pending_change, para n„o interferir em commit's futuros */
    sem_gl_info.current_table->pending_changes->pointer     = sem_pt_type_none;
    free(sem_gl_info.current_table->pending_changes->type);
    sem_gl_info.current_table->pending_changes->type        = NULL;
 
 }
 
-extern void print_value(const void*, const void*);
+/* Realiza v·rias checagens, dependendo do seletor usado */
 int sem_check(sem_check_type check, char* key)
 {
    sem_entry* entry = NULL;
 
+	/* Caso a checagem se dÍ sobre uma entrada especÌfica, busca-se essa entrada
+	    para se obter um ponteiro para ela. */
    if(key)
    {
       entry = sem_table_find(sem_gl_info.current_table, key);
@@ -277,12 +293,18 @@ int sem_check(sem_check_type check, char* key)
          if(check == sem_check_type_declared || sem_gl_info.current_table == sem_gl_info.local_table)
             entry = sem_table_find(sem_gl_info.global_table, key);
 
-      if(!entry) return ERROR;
+      if(!entry) return ERROR;	/* Se a entrada n„o for encontrada, È impossÌvel
+		                               realizar a checagem requisitada sobre ela */
    }
 
    switch(check)
    {
+		/* Verifica se um tipo especÌfico est· declarado */
       case sem_check_type_declared:
+
+			/* Caso ele esteja declarado e È um tipo definido pelo usu·rio, copia o conte˙do deste tipo
+			(campos armazenados em uma tabela sem‚ntica) para o pending_changes. Este artifÌcio serve para
+			facilitar a checagem de tipos de registros aninhados */
          if(entry->category == type_def)
          {
             sem_gl_info.current_table->pending_changes->more_info = entry->more_info;
@@ -291,25 +313,31 @@ int sem_check(sem_check_type check, char* key)
          else
             return ERROR;
 
+		/* Checa se a vari·vel especificada foi declarada */
       case sem_check_variable_declared:
          return   (entry->category == variable) ?
                   SUCCESS : ERROR;
 
+		/* Checa se a constante especificada foi declarada */
       case sem_check_var_const_declared:
          return   ((entry->category == variable) || (entry->category == constant)) ?
                   SUCCESS : ERROR;
 
+		/* Checa se a funÁ„o/procedimento especificado foi delcarado */
       case sem_check_proc_func_declared:
          return   ((entry->category == procedure) || (entry->category == function)) ?
                   SUCCESS : ERROR;
 
+		/* Checa se h· uma entrada de qualquer categoria declarada com o identificador especificado */
       case sem_check_any_declared:
          return   SUCCESS;
 
+		/* Checa se o contexto atual permite o comando 'retorne' */
       case sem_check_return_allowed:
          return   (sem_gl_info.context_return_type) ?
                   SUCCESS : ERROR;
 
+		/* Checa se os dois tipos do topo da pilha s„o compatÌveis, desempilhando-os */
       case sem_check_attr:
          return sem_pop_check_push(NULL);
          break;
@@ -320,6 +348,9 @@ int sem_check(sem_check_type check, char* key)
 
 }
 
+/* FunÁ„o respons·vel pela impress„o dos erros especificados pela professora.
+   O uso de prev_line_number foi uma tentativa de fazer os erros serem acusados nas mesmas linhas especificadas pela professora
+	 nos casos de teste. Ele ajudou, mas n„o eliminou todas as discrep‚ncias. */
 void sem_error(sem_error_type error, char* error_string)
 {
    switch(error)
@@ -347,6 +378,7 @@ void sem_error(sem_error_type error, char* error_string)
    }
 }
 
+/* FunÁ„o respons·vel pelas mudanÁas de contexto. */
 void sem_context_change(sem_scope_chg_type type)
 {
    static sem_table* last_context = NULL;
@@ -357,13 +389,15 @@ void sem_context_change(sem_scope_chg_type type)
 
    switch(type)
    {
+		/* Muda o escopo global para o escopo local */
       case sem_scope_global_to_local:
 
+			/* Cria uma nova tabela para o escopo global */
          sem_gl_info.local_table = sem_table_get();
 
          param_list = sem_gl_info.global_table->pending_changes->param_list;
 
-         /* Insere os par√¢metros da funcao/procedimento na tabela local */
+         /* Insere os par‚metros da funcao/procedimento na tabela local */
          if(param_list)
             for(i = 0;
                i < param_list->size;
@@ -373,33 +407,43 @@ void sem_context_change(sem_scope_chg_type type)
                sem_table_insert(sem_gl_info.local_table, entry);
             }
 
-         /* Impede que fun√ß√µes/procedimentos futuros usem o mesmo param_list */
+         /* Impede que funÁıes/procedimentos futuros usem o mesmo param_list */
          sem_gl_info.global_table->pending_changes->param_list = NULL;
 
-         sem_gl_info.current_table = sem_gl_info.local_table;
+         sem_gl_info.current_table = sem_gl_info.local_table;	/* Agora o contexto corrente È a tabela local */
          break;
 
+		/* Sai do contexto de funÁ„o/procedimento para o escopo global */
       case sem_scope_local_to_global:
          sem_table_dispose(sem_gl_info.local_table);
          sem_gl_info.local_table = NULL;
 
-         sem_gl_info.current_table = sem_gl_info.global_table;
+         sem_gl_info.current_table = sem_gl_info.global_table;	/* Agora o contexto corrente È a tabela global */
 
          break;
 
+		/* Prepara o contexto para a inserÁ„o de campos de um registro */
       case sem_scope_register_insert:
 
-         t = sem_table_get();
-         sem_pending_update(sem_upd_more_info, t);
+			/* Os campos de um registro s„o armazenados em uma tabela de sÌmbolos */
+         t = sem_table_get();								/* Aloca uma nova tabela 																		*/
+         sem_pending_update(sem_upd_more_info, t);	/* Faz o more_info do pending_changes apontar para esta nova tabela alocada 	*/
 
+			/* Deste modo, ao dar o sem_commit posteriormente, o more_info do pending_changes ser· copiado para o more_info da
+			    entrada do registro */
 
-         if(!stack_peek(sem_gl_info.context_stack))     /* Empty stack */
-            last_context = sem_gl_info.current_table;
+			if(!stack_peek(sem_gl_info.context_stack))     	/* Empty stack */
+				last_context = sem_gl_info.current_table;		/* Salva o contexto corrente, caso ele n„o seja um contexto de registro
+				                                                 (ou seja, caso ele seja local_table ou global_table						*/
 
-         stack_push(sem_gl_info.context_stack, t);
+			stack_push(sem_gl_info.context_stack, t);			/* Empilha o novo contexto */
 
-         sem_gl_info.current_table = (sem_table*) stack_peek(sem_gl_info.context_stack);
+         sem_gl_info.current_table = (sem_table*) stack_peek(sem_gl_info.context_stack);	/* Muda o ponteiro corrente para o novo contexto */
          break;
+
+		/* Prepara o contexto para realizar uma consulta dentro de um registro
+			Busca o registro e muda o contexto corrente para o contexto de registro.
+			Salva o contexto corrente */
 
       case sem_scope_register_query:
 
@@ -420,6 +464,7 @@ void sem_context_change(sem_scope_chg_type type)
 
          break;
 
+		/* Encerra consulta/inserÁ„o de registro, alterando o contexto de acordo */
       case sem_scope_register_end:
          stack_pop(sem_gl_info.context_stack);
 
@@ -428,6 +473,7 @@ void sem_context_change(sem_scope_chg_type type)
 
          break;
 
+		/* Os dois prÛximos trechos apenas controlam se o contexto atual permite o comando retorne */
       case sem_scope_allows_return:
          sem_gl_info.context_return_type =
                    (char*) malloc((1+strlen(sem_gl_info.current_table->pending_changes->type))*sizeof(char));
@@ -487,7 +533,6 @@ list* sem_list_of(char* key)
    return entry->param_list;
 }
 
-extern void stack_print(stack* s);
 void sem_attrib_push(char* type)
 {
    if(!type) type = sem_gl_info.attrib_temp;
@@ -498,11 +543,6 @@ void sem_attrib_push(char* type)
 
    stack_push(sem_gl_info.attrib_stack, (void*) type);
 
-/*
-   printf("will push %s. after push:\n", type);
-   stack_print(sem_gl_info.attrib_stack);
-   printf("end_stack\n\n\n");
-*/
 
 }
 
@@ -685,5 +725,3 @@ void sem_insert_basic_functions(void)
    }
 
 }
-
-
