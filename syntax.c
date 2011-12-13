@@ -340,7 +340,7 @@ int variavel()
 
 
 /*
-Automato 5
+Automato 4
 Autor: Bruno
 
 <outros_ident>                 ::= . IDENT <outros_ident> | epsilon
@@ -403,7 +403,7 @@ int outros_ident()
    return SUCCESS;
 }
 /*
-Automato 6
+Automato 5
 Autor: Bruno
 
 <dimensao>                     ::= [ <exp_aritmetica> ] <dimensao>| epsilon
@@ -440,7 +440,7 @@ int dimensao()
    return SUCCESS;
 }
 /*
-Automato 7
+Automato 6
 Autor: Bruno
 <tipo>                              ::= registro <variavel> <mais_variaveis> fim_registro
                                      | <tipo_estendido>
@@ -490,7 +490,7 @@ int tipo()
 }
 
 /*
-Automato 8
+Automato 7
 Autor: Talita
 
 tipo_estendido ::=  ^ IDENT
@@ -527,7 +527,7 @@ int tipo_estendido()
 }
 
 /*
-Automato 9
+Automato 8
 Autor: Talita
 
 <declaracao_global> ::=  procedimento IDENT ( <parametros_opcional> ) <declaracoes_locais> <comandos> fim_procedimento
@@ -644,7 +644,7 @@ int declaracao_global()
 }
 
 /*
-Automato 10
+Automato 9
 Autor: Talita
 
 <parametro> ::= <var_opcional> <identificador> <mais_ident> : <tipo_estendido> <mais_parametros>
@@ -712,7 +712,7 @@ int parametro()
 }
 
 /*
-Automato 11
+Automato 10
 Autor: Talita
 
 <comandos> ::=  <cmd_leia> <comandos> | <cmd_escreva> <comandos> | <cmd_se> <comandos> | <cmd_caso> <comandos>
@@ -772,7 +772,7 @@ int comandos()
 }
 
 /*
-Automato 12
+Automato 11
 Autor: Talita
 
 <cmd_leia> ::= leia ( <identificador> <mais_ident> )
@@ -809,7 +809,7 @@ int cmd_leia()
 }
 
 /*
-Automato 13
+Automato 12
 Autor: Talita
 
 <cmd_escreva> ::= escreva ( <expressao> <mais_expressao> )
@@ -844,7 +844,7 @@ int cmd_escreva()
 }
 
 /*
-Automato 14
+Automato 13
 Autor: Lucas
 
 <cmd_se> ::= se <expressao> entao <comandos> senao <comandos> fim_se
@@ -881,7 +881,7 @@ int cmd_se()
 }
 
 /*
-Automato 15
+Automato 14
 Autor: Lucas
 
 <cmd_caso> ::= caso <exp_aritmetica> seja <selecao> <senao_opcional> fim_caso
@@ -919,7 +919,7 @@ int cmd_caso()
 
 
 /*
-Automato 16
+Automato 15
 Autor: Lucas
 
 <cmd_para>  ::= para IDENT <- <exp_aritmetica> ate <exp_aritmetica> faca <comandos> fim_para
@@ -963,7 +963,7 @@ int cmd_para()
 
 
 /*
-Automato 17
+Automato 16
 Autor: Lucas
 
 <cmd_enquanto> ::= enquanto <expressao> faca <comandos> fim_enquanto
@@ -992,7 +992,7 @@ int cmd_enquanto()
 }
 
 /*
-Automato 18
+Automato 17
 Autor: Lucas
 
 <cmd_faca> ::= faca <comandos> ate <expressao>
@@ -1017,7 +1017,7 @@ int cmd_faca()
 }
 
 /*
-Automato 19
+Automato 18
 Autor: Lucas
 
 <cmd_pont_ident> ::= ^ IDENT <outros_ident> <dimensao> <- <expressao>
@@ -1050,7 +1050,7 @@ int cmd_pont_ident()
 }
 
 /*
-Automato 20
+Automato 19
 Autor: Lucas
 
 <cmd_ident> ::= IDENT <chamada_atribuicao>
@@ -1169,7 +1169,7 @@ int cmd_ident()
 
 
 /*
-Automato 21
+Automato 20
 Autor: Lucas
 
 <cmd_retorne> ::= retorne <expressao>
@@ -1196,7 +1196,7 @@ int cmd_retorne()
 }
 
 /*
-Automato 22
+Automato 21
 Autor: Marcos
 
 <selecao>                        ::= <constantes> : <comandos> <selecao>
@@ -1221,7 +1221,7 @@ int selecao()
 }
 
 /*
-Automato 23
+Automato 22
 Autor: Marcos
 
 <constantes>             ::=   NUM_INT .. - NUM_INT , <constantes>
@@ -1272,7 +1272,7 @@ int constantes()
 }
 
 /*
-Automato 24
+Automato 23
 Autor: Marcos
 
 <exp_aritmetica>                 ::= <termo> <outros_termos>
@@ -1298,7 +1298,7 @@ int exp_aritmetica()
 }
 
 /*
-Automato 25
+Automato 24
 Autor: Marcos
 
 <termo>                          ::= <fator> <outros_fatores>
@@ -1327,7 +1327,7 @@ int termo()
 }
 
 /*
-Automato 26
+Automato 25
 Autor: Marcos
 
 <fator>                          ::= <parcela> <outras_parcelas>
@@ -1521,7 +1521,7 @@ int fator()
 }
 
 /*
-Automato 27
+Automato 26
 Autor: Nathan
 
 <chamada_partes>  ::= ( <expressao> <mais_expressao> )
@@ -1562,7 +1562,7 @@ int chamada_partes()
 }*/
 
 /*
-Automato 28
+Automato 27
 Autor: Nathan
 
 <parcela_logica> ::= verdadeiro
@@ -1605,7 +1605,7 @@ int parcela_logica()
 
 
 /*
-Automato 29
+Automato 28
 Autor: Nathan
 
 <expressao>                      ::= <termo_logico> <outros_termos_logicos>
@@ -1650,7 +1650,7 @@ int expressao()
 }
 
 /*
-Automato 30
+Automato 29
 Autor: Nathan
 
 <outros_fatores_logicos>   ::= e nao <parcela_logica> <outros_fatores_logicos>
@@ -1684,7 +1684,7 @@ int outros_fatores_logicos()
 }
 
 /*
-Automato 31
+Automato 30
 
 Novo identificador, que agrupa algumas chamadas comuns dos automatos
 cmd_leia
