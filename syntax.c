@@ -1276,6 +1276,9 @@ Automato 23
 Autor: Marcos
 
 <exp_aritmetica>                 ::= <termo> <outros_termos>
+<outros_termos>                  ::= <op_adicao> <termo> <outros_termos> | epsilon
+<op_adicao> ::= + | -
+
 */
 
 int exp_aritmetica()
